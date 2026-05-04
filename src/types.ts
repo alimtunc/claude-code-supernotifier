@@ -10,11 +10,10 @@ export interface SupernotifierConfig {
   focusOnClick: boolean;
   editorUriScheme: string;
   extensionUriAuthority: string;
-  terminalNotifierPath: string;
+  notifierBinaryPath: string;
   claudeOpenSessionCommand: string;
   claudeFocusCommand: string;
   editorCliPath: string;
-  senderBundleId: string;
 }
 
 export interface ClaudeHookCommand {

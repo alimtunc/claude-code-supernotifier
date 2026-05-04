@@ -16,6 +16,10 @@ export function installedNotifierAppPath(): string {
   return path.join(appDir, NOTIFIER_APP_NAME);
 }
 
+export function notifierBinaryPath(): string {
+  return path.join(installedNotifierAppPath(), 'Contents', 'MacOS', 'ClaudeCodeSupernotifier');
+}
+
 export function ensureNotifierApp(context: vscode.ExtensionContext): void {
   if (process.platform !== 'darwin') {
     return;

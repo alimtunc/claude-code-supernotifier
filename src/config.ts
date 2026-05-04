@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { CONFIG_SECTION } from './constants';
-import { NOTIFIER_BUNDLE_ID } from './notifierApp';
+import { notifierBinaryPath } from './notifierApp';
 import { findMacBinary } from './shared/binaries';
 import { DEFAULTS, EXTENSION_URI_AUTHORITY } from './shared/constants';
 import type { SupernotifierConfig } from './types';
@@ -20,10 +20,9 @@ export function getRuntimeConfig(): SupernotifierConfig {
     focusOnClick: config.get('focusOnClick', DEFAULTS.focusOnClick),
     editorUriScheme: vscode.env.uriScheme,
     extensionUriAuthority: EXTENSION_URI_AUTHORITY,
-    terminalNotifierPath: findMacBinary('terminal-notifier'),
+    notifierBinaryPath: notifierBinaryPath(),
     claudeOpenSessionCommand: config.get('claudeOpenSessionCommand', DEFAULTS.claudeOpenSessionCommand),
     claudeFocusCommand: config.get('claudeFocusCommand', DEFAULTS.claudeFocusCommand),
-    editorCliPath: config.get('editorCliPath', '') || findMacBinary('code'),
-    senderBundleId: config.get('senderBundleId', '') || NOTIFIER_BUNDLE_ID
+    editorCliPath: config.get('editorCliPath', '') || findMacBinary('code')
   };
 }
