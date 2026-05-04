@@ -55,6 +55,7 @@
     "vsce:publish": "pnpm run package && vsce publish --no-dependencies",
     "vsce:install": "pnpm run vsce:package && code --install-extension claude-code-supernotifier-$npm_package_version.vsix --force",
     "vsce:uninstall": "code --uninstall-extension alimtunc.claude-code-supernotifier",
+    "vsce:clean-install": "bash scripts/clean-install.sh",
     "vscode:prepublish": "pnpm run package"
   },
   "devDependencies": {

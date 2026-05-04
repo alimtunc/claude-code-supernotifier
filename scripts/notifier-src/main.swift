@@ -101,6 +101,13 @@ if args.dryRun {
     exit(0)
 }
 
+// macOS may relaunch the .app to deliver a notification response. That fresh
+// invocation has no CLI args and would otherwise post an empty notification.
+// Refuse to post when called without --message, --prime, or --dry-run.
+if !args.prime && args.message.isEmpty {
+    exit(0)
+}
+
 let center = UNUserNotificationCenter.current()
 let authGroup = DispatchGroup()
 authGroup.enter()
