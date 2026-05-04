@@ -22,8 +22,8 @@ src/
   ...            # Other extension-only modules (config, watcher, URI handler).
 
 dist/            # Build output (gitignored).
-media/           # Icon source (svg) and generated 128x128 png.
-scripts/         # Repo utilities (icon generation, ...).
+media/           # 128x128 png used as the marketplace icon.
+scripts/         # Repo utilities (e2e install dry-run, ...).
 ```
 
 The `shared/` boundary is enforced by convention: anything imported from `vscode` belongs outside it.
@@ -33,7 +33,6 @@ The `shared/` boundary is enforced by convention: anything imported from `vscode
 ```sh
 pnpm install
 pnpm exec lefthook install   # registers the pre-commit hooks
-pnpm run build:icon          # regenerates media/icon.png from media/icon.svg
 ```
 
 ## Daily workflow

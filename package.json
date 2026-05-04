@@ -50,7 +50,6 @@
     "watch:esbuild": "node esbuild.js --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build:icon": "node scripts/build-icon.mjs",
     "package": "pnpm run lint && pnpm run typecheck && pnpm run test && node esbuild.js --production",
     "vsce:package": "pnpm run package && vsce package --no-dependencies",
     "vsce:publish": "pnpm run package && vsce publish --no-dependencies",
