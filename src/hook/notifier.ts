@@ -29,14 +29,8 @@ export function notifyMacOS(event: NormalisedEvent, config: HookConfig): void {
     args.push('--sound', config.sound);
   }
 
-  if (config.focusOnClick !== false && event.workspaceRoot) {
-    if (event.clickedPath) {
-      args.push('--click-touch', event.clickedPath);
-    }
-    args.push('--click-open', event.workspaceRoot);
-    if (config.editorCliPath) {
-      args.push('--editor-cli', config.editorCliPath);
-    }
+  if (config.focusOnClick !== false && event.clickedPath) {
+    args.push('--click-touch', event.clickedPath);
   }
 
   const child = cp.spawn(binary, args, {

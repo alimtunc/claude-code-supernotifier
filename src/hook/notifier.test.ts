@@ -89,13 +89,11 @@ describe('notifyMacOS', () => {
     expect(args).toContain('/tmp/state/signal.json');
     expect(args).toContain('--click-touch');
     expect(args).toContain('/tmp/state/clicked');
-    expect(args).toContain('--click-open');
-    expect(args).toContain('/tmp/repo');
-    expect(args).toContain('--editor-cli');
-    expect(args).toContain('/usr/local/bin/code');
+    expect(args).not.toContain('--click-open');
+    expect(args).not.toContain('--editor-cli');
   });
 
-  it('omits click args when focusOnClick is false', () => {
+  it('omits click-touch when focusOnClick is false', () => {
     Object.defineProperty(process, 'platform', { value: 'darwin' });
 
     notifyMacOS(baseEvent, {
@@ -105,6 +103,5 @@ describe('notifyMacOS', () => {
 
     const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
     expect(args).not.toContain('--click-touch');
-    expect(args).not.toContain('--click-open');
   });
 });
