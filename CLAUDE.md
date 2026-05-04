@@ -59,7 +59,7 @@ node esbuild.js --production   # bundles both extension + hook
 
 ## Code style (only what oxlint/oxfmt can't enforce)
 
-- Default to **no comments**. Add one when the *why* is non-obvious — e.g. the macOS relaunch guard in `main.swift`, the `dispatchMain()` rationale, the `noUncheckedIndexedAccess` workaround. Don't restate what the code already says.
+- Default to **no comments**. Add one when the _why_ is non-obvious — e.g. the macOS relaunch guard in `main.swift`, the `dispatchMain()` rationale, the `noUncheckedIndexedAccess` workaround. Don't restate what the code already says.
 - DRY: when the third copy of a snippet appears, extract it. Two copies are fine.
 - SOC: the extension entrypoint (`extension.ts`) does **registration only**. Logic lives in `commands.ts`, `clickSignals.ts`, `notifierApp.ts`, `runtimeFiles.ts`, etc. Keep `activate()` short.
 - Prefer pure functions in `shared/`. Side effects (`fs`, `cp`, `vscode.*`) belong in their module.

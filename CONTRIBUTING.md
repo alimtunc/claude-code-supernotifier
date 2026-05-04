@@ -39,13 +39,13 @@ pnpm test:watch    # rerun vitest on save
 
 The same checks run locally and in CI:
 
-| Tool      | Command                 | Purpose                                                |
-| --------- | ----------------------- | ------------------------------------------------------ |
-| `oxlint`  | `pnpm run lint`         | Lint TypeScript / JavaScript / JSON.                   |
-| `oxfmt`   | `pnpm run format:check` | Formatting + import-sort check.                        |
-| `tsgo`    | `pnpm run typecheck`    | TypeScript native typecheck.                           |
-| `vitest`  | `pnpm test`             | Unit tests for pure modules.                           |
-| `esbuild` | `pnpm run package`      | Production bundle of `extension.js` and `hook.js`.     |
+| Tool      | Command                 | Purpose                                            |
+| --------- | ----------------------- | -------------------------------------------------- |
+| `oxlint`  | `pnpm run lint`         | Lint TypeScript / JavaScript / JSON.               |
+| `oxfmt`   | `pnpm run format:check` | Formatting + import-sort check.                    |
+| `tsgo`    | `pnpm run typecheck`    | TypeScript native typecheck.                       |
+| `vitest`  | `pnpm test`             | Unit tests for pure modules.                       |
+| `esbuild` | `pnpm run package`      | Production bundle of `extension.js` and `hook.js`. |
 
 `pnpm run package` chains lint → typecheck → tests → bundle. Run it before opening a PR.
 
