@@ -20,10 +20,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Renamed remaining `Supernotify*` TypeScript identifiers to `Supernotifier*` (`SupernotifyConfig` &rarr; `SupernotifierConfig`, `SupernotifyUriHandler` &rarr; `SupernotifierUriHandler`).
 - Replaced 500 ms polling with `vscode.workspace.createFileSystemWatcher` for click signals.
 - Centralised binary discovery, command IDs and runtime paths to remove duplication.
+- Replaced the `terminal-notifier` Homebrew dependency with a bundled Swift helper (`ClaudeCodeSupernotifier.app`). Notifications now appear under the "Claude Code SuperNotifier" identity with the octopus icon natively, and no longer require `brew install`.
 
 ### Removed
 
 - Unused `node-notifier` dependency.
+- `claudeCodeSupernotifier.senderBundleId` setting (the bundled helper now provides the sender identity).
+- `Claude Code SuperNotifier: Configure macOS terminal-notifier` command (no longer applicable).
 
 ### Fixed
 

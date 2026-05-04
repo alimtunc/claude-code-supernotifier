@@ -11,19 +11,17 @@ When Claude finishes a turn or needs your attention, you get a real macOS banner
 The marketplace already has plenty of "Claude notifier" extensions. SuperNotifier focuses on the multi-window workflow:
 
 - **Multi-session aware** &mdash; each notification is grouped per session id and routes back to the right window when clicked.
-- **Click-to-focus** &mdash; uses `terminal-notifier` to open the right workspace and trigger the Claude Code editor command.
+- **Click-to-focus** &mdash; opens the right workspace and triggers the Claude Code editor command on banner click.
 - **Repo-aware** &mdash; titles and messages know about the current repo and Git branch.
 - **Native** &mdash; real macOS banners, not webview/toast hacks.
 
 ## Install
 
-1. Install [`terminal-notifier`](https://github.com/julienXX/terminal-notifier) so notifications can be made clickable:
-   ```sh
-   brew install terminal-notifier
-   ```
-2. Install **Claude Code SuperNotifier** from the VS Code Marketplace.
-3. Run `Claude Code SuperNotifier: Install Claude Hooks` from the Command Palette to register the helper with Claude Code.
-4. Run `Claude Code SuperNotifier: Test macOS Notification` to verify everything works.
+1. Install **Claude Code SuperNotifier** from the VS Code Marketplace.
+2. Run `Claude Code SuperNotifier: Install Claude Hooks` from the Command Palette to register the helper with Claude Code.
+3. Run `Claude Code SuperNotifier: Test macOS Notification` to verify everything works. The first time a notification fires, macOS will ask you to allow notifications under **Claude Code SuperNotifier** — accept once and you're done.
+
+> macOS notifications are delivered by a small bundled helper (`ClaudeCodeSupernotifier.app`) that ships with the extension. No Homebrew, no `terminal-notifier`, no third-party CLI required.
 
 ## Commands
 
@@ -32,7 +30,6 @@ The marketplace already has plenty of "Claude notifier" extensions. SuperNotifie
 | `Claude Code SuperNotifier: Install Claude Hooks`              | Registers the helper with `~/.claude/settings.json`. |
 | `Claude Code SuperNotifier: Uninstall Claude Hooks`            | Removes the hook entries managed by this extension.  |
 | `Claude Code SuperNotifier: Test macOS Notification`           | Sends a sample notification through the helper.      |
-| `Claude Code SuperNotifier: Configure macOS terminal-notifier` | Detects or installs `terminal-notifier`.             |
 | `Claude Code SuperNotifier: Open Settings`                     | Opens the SuperNotifier settings section.            |
 
 ## How it works
@@ -48,7 +45,7 @@ It then registers the helper as a [Claude Code hook](https://docs.claude.com/en/
 1. Reads the JSON payload from `stdin`.
 2. Enriches it with repository and Git branch information.
 3. Logs the event to `~/.claude-code-supernotifier/events.jsonl` for debugging.
-4. Displays a clickable macOS banner via `terminal-notifier` (falling back to `osascript` when needed).
+4. Spawns the bundled `ClaudeCodeSupernotifier.app` helper, which posts a clickable macOS banner under our own bundle identity (octopus icon).
 5. Drops a tiny `clicked` file when the notification is acted on, which the extension watches with `vscode.workspace.createFileSystemWatcher` to focus the right session.
 
 ## Settings
@@ -69,7 +66,6 @@ All settings live under the `claudeCodeSupernotifier.*` namespace.
 | `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | Command used to open a session by id.                                  |
 | `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.                 |
 | `editorCliPath`            | _auto_                         | Editor CLI used to focus a workspace. Empty auto-detects `code`.       |
-| `senderBundleId`           | _empty_                        | Optional bundle id shown as the notification sender.                   |
 
 ### Template variables
 
@@ -93,7 +89,7 @@ The helper writes everything Claude Code sends it to `~/.claude-code-supernotifi
 
 ## Troubleshooting
 
-- **No notification appears:** check System Settings &rarr; Notifications &rarr; `terminal-notifier` (or your custom `senderBundleId`). macOS keys notification permissions to the bundle id.
+- **No notification appears:** check System Settings &rarr; Notifications &rarr; **Claude Code SuperNotifier** and ensure notifications are allowed.
 - **Click does nothing:** make sure the `code` CLI is on your `PATH` (or set `claudeCodeSupernotifier.editorCliPath`).
 - **Hooks not firing:** run `Claude Code SuperNotifier: Install Claude Hooks` again, then check `~/.claude/settings.json` for an entry that points to `~/.claude-code-supernotifier/hook.js`.
 
