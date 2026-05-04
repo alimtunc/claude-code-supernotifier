@@ -121,7 +121,7 @@
         },
         "claudeCodeSupernotifier.titleTemplate": {
           "type": "string",
-          "default": "Claude: ${repo}",
+          "default": "${repo}",
           "markdownDescription": "Notification title template. See README for the full list of `${variables}`."
         },
         "claudeCodeSupernotifier.messageTemplate": {
