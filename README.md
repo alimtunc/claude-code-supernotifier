@@ -25,12 +25,12 @@ The marketplace already has plenty of "Claude notifier" extensions. SuperNotifie
 
 ## Commands
 
-| Command                                                        | Description                                          |
-| -------------------------------------------------------------- | ---------------------------------------------------- |
-| `Claude Code SuperNotifier: Install Claude Hooks`              | Registers the helper with `~/.claude/settings.json`. |
-| `Claude Code SuperNotifier: Uninstall Claude Hooks`            | Removes the hook entries managed by this extension.  |
-| `Claude Code SuperNotifier: Test macOS Notification`           | Sends a sample notification through the helper.      |
-| `Claude Code SuperNotifier: Open Settings`                     | Opens the SuperNotifier settings section.            |
+| Command                                              | Description                                          |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| `Claude Code SuperNotifier: Install Claude Hooks`    | Registers the helper with `~/.claude/settings.json`. |
+| `Claude Code SuperNotifier: Uninstall Claude Hooks`  | Removes the hook entries managed by this extension.  |
+| `Claude Code SuperNotifier: Test macOS Notification` | Sends a sample notification through the helper.      |
+| `Claude Code SuperNotifier: Open Settings`           | Opens the SuperNotifier settings section.            |
 
 ## How it works
 

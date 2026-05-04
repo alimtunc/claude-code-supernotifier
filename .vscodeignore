@@ -12,7 +12,7 @@ coverage/**
 docs/**
 scripts/**
 
-# Stale vendor directory — the extension uses the system terminal-notifier only.
+# Legacy vendor directory — the bundled notifier ships from media/ClaudeCodeSupernotifier.app.
 resources/**
 
 # Configs not needed at runtime

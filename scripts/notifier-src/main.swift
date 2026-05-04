@@ -129,6 +129,9 @@ let content = UNMutableNotificationContent()
 content.title = args.title
 content.body = args.message
 if let s = args.sound, !s.isEmpty {
+    // UNNotificationSound(named:) on macOS resolves the lookup chain:
+    // app bundle Resources/, ~/Library/Sounds/, /Library/Sounds/, /System/Library/Sounds/<name>.aiff.
+    // System sounds like "Glass", "Ping", "Hero" therefore work without bundling .caf files.
     content.sound = UNNotificationSound(named: UNNotificationSoundName(s))
 }
 if let g = args.group, !g.isEmpty {

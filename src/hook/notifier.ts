@@ -39,10 +39,14 @@ export function notifyMacOS(event: NormalisedEvent, config: HookConfig): void {
     }
   }
 
-  cp.spawn(binary, args, {
+  const child = cp.spawn(binary, args, {
     detached: true,
     stdio: 'ignore'
-  }).unref();
+  });
+  child.on('error', () => {
+    // Best-effort: never let a misconfigured notifier crash the hook.
+  });
+  child.unref();
   // spawn (not spawnSync): the hook returns immediately while the notifier
   // waits up to its --timeout for a click.
 }

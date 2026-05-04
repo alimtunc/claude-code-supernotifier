@@ -28,7 +28,7 @@ const baseEvent: NormalisedEvent = {
   raw: {}
 };
 
-const fakeChild = { unref: () => {} } as unknown as cp.ChildProcess;
+const fakeChild = { on: () => fakeChild, unref: () => {} } as unknown as cp.ChildProcess;
 
 describe('notifyMacOS', () => {
   let originalPlatform: PropertyDescriptor | undefined;
