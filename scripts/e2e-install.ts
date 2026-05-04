@@ -49,7 +49,7 @@ console.log(
   'Fresh install — created hook events:',
   Object.keys(fresh.hooks ?? {})
     .filter((k) => fresh.hooks?.[k]?.some((g) => g.hooks?.some((h) => h.command === command)))
-    .sort()
+    .toSorted()
 );
 
 console.log('');
@@ -72,11 +72,11 @@ console.log(
   'Other top-level settings preserved on install:',
   Object.keys(before)
     .filter((k) => k !== 'hooks')
-    .sort()
+    .toSorted()
     .join(', ') ===
     Object.keys(reinstalled)
       .filter((k) => k !== 'hooks')
-      .sort()
+      .toSorted()
       .join(', ')
 );
 console.log(
