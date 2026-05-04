@@ -245,8 +245,10 @@ apply_release() {
       const content = fs.readFileSync('CHANGELOG.md', 'utf8');
       const block = process.env.NEXT_BLOCK;
       const m = content.match(/^## \[/m);
+      // oxfmt expects a blank line between top-level sections — we emit
+      // two newlines (block end + blank) before the next ## [ block.
       if (m && m.index !== undefined) {
-        fs.writeFileSync('CHANGELOG.md', content.slice(0, m.index) + block + '\n' + content.slice(m.index));
+        fs.writeFileSync('CHANGELOG.md', content.slice(0, m.index) + block + '\n\n' + content.slice(m.index));
       } else {
         fs.writeFileSync('CHANGELOG.md', content.replace(/\n*$/, '\n\n') + block + '\n');
       }
