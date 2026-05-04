@@ -14,7 +14,7 @@ export const DEFAULTS = {
   notifyOnStop: true,
   notifyOnAttention: true,
   sound: 'Glass',
-  titleTemplate: 'Claude: ${repo}',
+  titleTemplate: '${repo}',
   messageTemplate: '${eventLabel}${branchSuffix}',
   includeBranch: true,
   focusOnClick: true,
