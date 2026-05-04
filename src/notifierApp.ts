@@ -7,10 +7,8 @@ import { appDir } from './shared/paths';
 export const NOTIFIER_APP_NAME = 'ClaudeCodeSupernotifier.app';
 export const NOTIFIER_BUNDLE_ID = 'com.alimtunc.claude-code-supernotifier';
 
-const LSREGISTER_PATH =
-  '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister';
-const LSREGISTER_TIMEOUT_MS = 5000;
 const STAMP_FILE = '.notifier-app.stamp';
+const PRIME_TIMEOUT_MS = 4000;
 
 export function installedNotifierAppPath(): string {
   return path.join(appDir, NOTIFIER_APP_NAME);
@@ -34,38 +32,46 @@ export function ensureNotifierApp(context: vscode.ExtensionContext): void {
   const stampPath = path.join(appDir, STAMP_FILE);
   const sourceStamp = readStamp(source);
 
-  if (fs.existsSync(target) && sourceStamp && readStampFile(stampPath) === sourceStamp) {
-    return;
-  }
+  const upToDate =
+    fs.existsSync(target) && sourceStamp !== undefined && readStampFile(stampPath) === sourceStamp;
 
-  try {
-    fs.mkdirSync(appDir, { recursive: true });
-    fs.rmSync(target, { recursive: true, force: true });
-    fs.cpSync(source, target, { recursive: true });
-    registerWithLaunchServices(target);
-    if (sourceStamp) {
-      fs.writeFileSync(stampPath, sourceStamp, 'utf8');
+  if (!upToDate) {
+    try {
+      fs.mkdirSync(appDir, { recursive: true });
+      fs.rmSync(target, { recursive: true, force: true });
+      fs.cpSync(source, target, { recursive: true });
+      fs.chmodSync(notifierBinaryPath(), 0o755);
+      if (sourceStamp) {
+        fs.writeFileSync(stampPath, sourceStamp, 'utf8');
+      }
+      primeAuthorization(target);
+    } catch (error) {
+      console.error('[claude-code-supernotifier] failed to install notifier app', error);
     }
-  } catch (error) {
-    console.error('[claude-code-supernotifier] failed to install notifier app', error);
   }
 }
 
-function registerWithLaunchServices(appPath: string): void {
-  if (!fs.existsSync(LSREGISTER_PATH)) {
+function primeAuthorization(appPath: string): void {
+  const exe = path.join(appPath, 'Contents', 'MacOS', 'ClaudeCodeSupernotifier');
+  if (!fs.existsSync(exe)) {
     return;
   }
-  cp.spawnSync(LSREGISTER_PATH, ['-f', appPath], {
-    encoding: 'utf8',
-    timeout: LSREGISTER_TIMEOUT_MS
-  });
+  try {
+    cp.spawnSync(exe, ['--prime'], {
+      timeout: PRIME_TIMEOUT_MS,
+      stdio: 'ignore'
+    });
+  } catch {
+    // Best-effort. The user will see the permission prompt the first time
+    // they receive a real notification instead.
+  }
 }
 
 function readStamp(appPath: string): string | undefined {
   try {
     const plist = fs.readFileSync(path.join(appPath, 'Contents', 'Info.plist'));
-    const icns = fs.readFileSync(path.join(appPath, 'Contents', 'Resources', 'AppIcon.icns'));
-    return `${plist.length}:${icns.length}`;
+    const exe = fs.readFileSync(path.join(appPath, 'Contents', 'MacOS', 'ClaudeCodeSupernotifier'));
+    return `${plist.length}:${exe.length}`;
   } catch {
     return undefined;
   }
