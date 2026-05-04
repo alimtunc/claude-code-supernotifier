@@ -10,5 +10,14 @@
   "arrowParens": "always",
   "endOfLine": "lf",
   "sortPackageJson": false,
+  "sortImports": {
+    "newlinesBetween": false,
+    "groups": [
+      "value-builtin",
+      "value-external",
+      ["value-parent", "value-sibling", "value-index"],
+      ["type-builtin", "type-external", "type-parent", "type-sibling", "type-index"]
+    ]
+  },
   "ignorePatterns": ["dist/", "out/", "coverage/", "node_modules/", "*.vsix", "pnpm-lock.yaml"]
 }

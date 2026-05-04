@@ -44,28 +44,6 @@ describe('normaliseEvent', () => {
     );
     expect(ev.eventLabel).toBe('Custom thing');
   });
-
-  it('produces an empty focusUri when focusOnClick is disabled', () => {
-    const ev = normaliseEvent(
-      { hook_event_name: 'Stop', cwd: '/tmp/r' },
-      { ...baseConfig, focusOnClick: false }
-    );
-    expect(ev.focusUri).toBe('');
-  });
-
-  it('builds a focusUri when scheme + authority are provided', () => {
-    const ev = normaliseEvent(
-      { hook_event_name: 'Stop', cwd: '/tmp/r', session_id: 'abc' },
-      {
-        ...baseConfig,
-        focusOnClick: true,
-        editorUriScheme: 'vscode',
-        extensionUriAuthority: 'alimtunc.claude-code-supernotifier'
-      }
-    );
-    expect(ev.focusUri).toMatch(/^vscode:\/\/alimtunc\.claude-code-supernotifier\/focus\?/);
-    expect(ev.focusUri).toContain('sessionId=abc');
-  });
 });
 
 describe('shouldNotify', () => {

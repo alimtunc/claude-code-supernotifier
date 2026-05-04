@@ -2,7 +2,7 @@
   "name": "claude-code-supernotifier",
   "displayName": "Claude Code SuperNotifier",
   "description": "Native macOS notifications for Claude Code sessions: multi-window aware, click-to-focus, repo-aware templates.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "alimtunc",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -14,6 +14,7 @@
   "bugs": {
     "url": "https://github.com/alimtunc/claude-code-supernotifier/issues"
   },
+  "qna": "marketplace",
   "keywords": [
     "claude",
     "claude-code",
@@ -24,16 +25,20 @@
     "productivity"
   ],
   "categories": [
+    "AI",
     "Other"
   ],
+  "galleryBanner": {
+    "color": "#1f1d2e",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.90.0",
     "node": ">=20"
   },
   "main": "./dist/extension.js",
   "activationEvents": [
-    "onStartupFinished",
-    "onUri"
+    "onStartupFinished"
   ],
   "packageManager": "pnpm@10.33.0",
   "scripts": {
@@ -155,11 +160,6 @@
           "type": "string",
           "default": "claude-vscode.focus",
           "markdownDescription": "VS Code command executed after opening a Claude Code session to bring it into focus."
-        },
-        "claudeCodeSupernotifier.editorCliPath": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Optional editor CLI path used to focus the workspace on notification click. Empty auto-detects the VS Code `code` CLI."
         }
       }
     }

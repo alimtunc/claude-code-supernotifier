@@ -15,14 +15,17 @@ scripts/**
 # Legacy vendor directory — the bundled notifier ships from media/ClaudeCodeSupernotifier.app.
 resources/**
 
-# Configs not needed at runtime
+# Configs and contributor docs not needed at runtime
 .editorconfig
 .gitignore
 .lefthook-local.yml
 .npmrc
+.oxfmtrc.json
 .oxlintrc.json
 .prettierignore
 .prettierrc.json
+CLAUDE.md
+CONTRIBUTING.md
 esbuild.js
 lefthook.yml
 tsconfig.json

@@ -2,9 +2,9 @@ import * as path from 'node:path';
 import { DEFAULTS } from '../shared/constants';
 import { getClickedPath, getSignalPath } from '../shared/paths';
 import { renderTemplate, truncate } from '../shared/template';
-import type { HookConfig, HookInputEvent, NormalisedEvent } from './types';
 import { getGitBranch } from './git';
 import { findWorkspaceRoot } from './workspace';
+import type { HookConfig, HookInputEvent, NormalisedEvent } from './types';
 
 const ASSISTANT_MESSAGE_MAX_LENGTH = 180;
 
@@ -37,7 +37,6 @@ export function normaliseEvent(input: HookInputEvent, config: HookConfig): Norma
     transcriptPath
   };
 
-  const focusUri = createFocusUri(variables, config);
   const workspaceRoot = findWorkspaceRoot(cwd);
   const title = renderTemplate(config.titleTemplate ?? DEFAULTS.titleTemplate, variables);
   const message = renderTemplate(config.messageTemplate ?? DEFAULTS.messageTemplate, variables);
@@ -53,7 +52,6 @@ export function normaliseEvent(input: HookInputEvent, config: HookConfig): Norma
     sessionId,
     transcriptPath,
     workspaceRoot,
-    focusUri,
     clickedPath: getClickedPath(workspaceRoot),
     signalPath: getSignalPath(workspaceRoot),
     title,
@@ -91,21 +89,4 @@ function getEventLabel(event: string, notificationType: string, notificationMess
     return notificationMessage || 'Claude a besoin de toi';
   }
   return event;
-}
-
-function createFocusUri(variables: Record<string, string>, config: HookConfig): string {
-  if (config.focusOnClick === false || !config.editorUriScheme || !config.extensionUriAuthority) {
-    return '';
-  }
-
-  const params = new URLSearchParams();
-  params.set('cwd', variables.cwd ?? '');
-  if (variables.sessionId) {
-    params.set('sessionId', variables.sessionId);
-  }
-  if (variables.transcriptPath) {
-    params.set('transcriptPath', variables.transcriptPath);
-  }
-
-  return `${config.editorUriScheme}://${config.extensionUriAuthority}/focus?${params.toString()}`;
 }

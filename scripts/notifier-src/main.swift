@@ -8,8 +8,6 @@ struct Args {
     var group: String? = nil
     var signalPath: String? = nil
     var clickTouch: String? = nil
-    var clickOpen: String? = nil
-    var editorCli: String = "/usr/local/bin/code"
     var timeout: Double = 30
     var prime: Bool = false
     var dryRun: Bool = false
@@ -26,8 +24,6 @@ func parseArgs() -> Args {
         case "--group":       if let v = it.next() { a.group = v }
         case "--signal-path": if let v = it.next() { a.signalPath = v }
         case "--click-touch": if let v = it.next() { a.clickTouch = v }
-        case "--click-open":  if let v = it.next() { a.clickOpen = v }
-        case "--editor-cli":  if let v = it.next() { a.editorCli = v }
         case "--timeout":     if let v = it.next(), let d = Double(v) { a.timeout = d }
         case "--prime":       a.prime = true
         case "--dry-run":     a.dryRun = true
@@ -63,14 +59,6 @@ func runClickActions(_ args: Args) {
     if let p = args.clickTouch {
         FileManager.default.createFile(atPath: p, contents: Data(), attributes: nil)
     }
-    if let workspace = args.clickOpen {
-        let task = Process()
-        task.launchPath = args.editorCli
-        task.arguments = [workspace]
-        do { try task.run() } catch {
-            FileHandle.standardError.write(Data("editor launch failed: \(error)\n".utf8))
-        }
-    }
 }
 
 guard let bundleId = Bundle.main.bundleIdentifier, !bundleId.isEmpty else {
@@ -89,8 +77,6 @@ if args.dryRun {
         "group": args.group as Any,
         "signalPath": args.signalPath as Any,
         "clickTouch": args.clickTouch as Any,
-        "clickOpen": args.clickOpen as Any,
-        "editorCli": args.editorCli,
         "timeout": args.timeout,
         "prime": args.prime
     ]

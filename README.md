@@ -1,76 +1,87 @@
 # Claude Code SuperNotifier
 
-Native macOS notifications for [Claude Code](https://docs.claude.com/en/docs/claude-code) sessions, built for people who run several VS Code windows and Claude Code sessions in parallel.
+Native macOS notifications for [Claude Code](https://docs.claude.com/en/docs/claude-code), built for people who run several VS Code windows and Claude Code sessions in parallel.
 
-When Claude finishes a turn or needs your attention, you get a real macOS banner with an optional sound and repository-aware text. Click the notification to open the matching Claude Code session.
+When Claude finishes a turn or asks for permission, you get a real macOS banner with optional sound and repository-aware text. Click it and the matching VS Code window comes forward.
 
-> Status: macOS only. Linux and Windows support is on the roadmap.
+> macOS only for now. Linux/Windows are on the roadmap.
 
-## Why
+## Why this one
 
-The marketplace already has plenty of "Claude notifier" extensions. SuperNotifier focuses on the multi-window workflow:
+There are already plenty of "Claude notifier" extensions. SuperNotifier focuses on the multi-window workflow:
 
-- **Multi-session aware** &mdash; each notification is grouped per session id and routes back to the right window when clicked.
-- **Click-to-focus** &mdash; opens the right workspace and triggers the Claude Code editor command on banner click.
-- **Repo-aware** &mdash; titles and messages know about the current repo and Git branch.
-- **Native** &mdash; real macOS banners, not webview/toast hacks.
+- **Multi-session aware** — each banner is grouped per session id and routes back to the right window when clicked.
+- **Click-to-focus** — opens the right workspace and triggers the Claude Code editor command on banner click.
+- **Repo-aware** — title and message templates know about the repo and current Git branch.
+- **Native** — real macOS banners under our own bundle identity, not webview/toast hacks. Zero Homebrew dependencies.
 
 ## Install
 
 1. Install **Claude Code SuperNotifier** from the VS Code Marketplace.
-2. Run `Claude Code SuperNotifier: Install Claude Hooks` from the Command Palette to register the helper with Claude Code.
-3. Run `Claude Code SuperNotifier: Test macOS Notification` to verify everything works. The first time a notification fires, macOS will ask you to allow notifications under **Claude Code SuperNotifier** — accept once and you're done.
+2. Run `Claude Code SuperNotifier: Install Claude Hooks` from the Command Palette.
+3. Run `Claude Code SuperNotifier: Test macOS Notification`. The first time, macOS asks to allow notifications under "Claude Code SuperNotifier" — accept once.
 
-> macOS notifications are delivered by a small bundled helper (`ClaudeCodeSupernotifier.app`) that ships with the extension. No Homebrew, no `terminal-notifier`, no third-party CLI required.
+The bundled helper (`ClaudeCodeSupernotifier.app`) ships with the VSIX. No `brew install` step.
 
 ## Commands
 
-| Command                                              | Description                                          |
-| ---------------------------------------------------- | ---------------------------------------------------- |
-| `Claude Code SuperNotifier: Install Claude Hooks`    | Registers the helper with `~/.claude/settings.json`. |
-| `Claude Code SuperNotifier: Uninstall Claude Hooks`  | Removes the hook entries managed by this extension.  |
-| `Claude Code SuperNotifier: Test macOS Notification` | Sends a sample notification through the helper.      |
-| `Claude Code SuperNotifier: Open Settings`           | Opens the SuperNotifier settings section.            |
+| Command                                              | Effect                                              |
+| ---------------------------------------------------- | --------------------------------------------------- |
+| `Claude Code SuperNotifier: Install Claude Hooks`    | Registers the helper in `~/.claude/settings.json`.  |
+| `Claude Code SuperNotifier: Uninstall Claude Hooks`  | Removes the entries managed by this extension.      |
+| `Claude Code SuperNotifier: Test macOS Notification` | Sends a sample notification through the helper.    |
+| `Claude Code SuperNotifier: Open Settings`           | Opens the SuperNotifier settings section.          |
 
 ## How it works
 
-The extension writes a self-contained helper to:
-
 ```
-~/.claude-code-supernotifier/hook.js
+Claude Code  ──Stop/Notification─▶  ~/.claude-code-supernotifier/hook.js
+                                          │
+                                          ▼
+                              ClaudeCodeSupernotifier.app
+                              (UNUserNotificationCenter)
+                                          │
+                                  user clicks banner
+                                          │
+                                          ▼
+                          ~/.claude-code-supernotifier/focus-state/<hash>/clicked
+                                          │
+                              FileSystemWatcher (extension)
+                                          │
+                                          ▼
+                              focuses the right VS Code window
 ```
 
-It then registers the helper as a [Claude Code hook](https://docs.claude.com/en/docs/claude-code/hooks) in `~/.claude/settings.json`. Whenever Claude Code emits a `Stop`, `Notification` or `PermissionRequest` event, the helper:
+State files live in `~/.claude-code-supernotifier/`:
+- `hook.js` — the helper script (installed/refreshed on every activation).
+- `events.jsonl` — append-only log of every event the helper saw.
+- `errors.log` — crash details from the helper.
+- `focus-state/<sha1>/{signal.json, clicked}` — per-workspace click state.
 
-1. Reads the JSON payload from `stdin`.
-2. Enriches it with repository and Git branch information.
-3. Logs the event to `~/.claude-code-supernotifier/events.jsonl` for debugging.
-4. Spawns the bundled `ClaudeCodeSupernotifier.app` helper, which posts a clickable macOS banner under our own bundle identity (octopus icon).
-5. Drops a tiny `clicked` file when the notification is acted on, which the extension watches with `vscode.workspace.createFileSystemWatcher` to focus the right session.
+Nothing leaves your machine.
 
 ## Settings
 
-All settings live under the `claudeCodeSupernotifier.*` namespace.
+All settings live under `claudeCodeSupernotifier.*`.
 
-| Setting                    | Default                        | Purpose                                                                |
-| -------------------------- | ------------------------------ | ---------------------------------------------------------------------- |
-| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                                    |
-| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                                     |
-| `sound`                    | `Glass`                        | macOS sound (`Glass`, `Ping`, `Submarine`, ...). Empty disables sound. |
-| `titleTemplate`            | `Claude: ${repo}`              | Notification title template.                                           |
-| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                                            |
-| `includeBranch`            | `true`                         | Append the current Git branch to messages.                             |
-| `allowedRepos`             | `[]`                           | Optional allow-list of folder names. Empty means all repos.            |
-| `customRepoNames`          | `{}`                           | Map folder name &rarr; display name.                                   |
-| `focusOnClick`             | `true`                         | Open the matching Claude Code session on click.                        |
-| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | Command used to open a session by id.                                  |
-| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.                 |
-| `editorCliPath`            | _auto_                         | Editor CLI used to focus a workspace. Empty auto-detects `code`.       |
+| Setting                    | Default                        | Purpose                                                   |
+| -------------------------- | ------------------------------ | --------------------------------------------------------- |
+| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                       |
+| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                        |
+| `sound`                    | `Glass`                        | macOS sound name. Empty disables sound.                  |
+| `titleTemplate`            | `Claude: ${repo}`              | Notification title template.                              |
+| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                               |
+| `includeBranch`            | `true`                         | Append the current Git branch to messages.                |
+| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.        |
+| `customRepoNames`          | `{}`                           | Map folder name → display name.                          |
+| `focusOnClick`             | `true`                         | Open the matching session on click.                       |
+| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.             |
+| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.    |
 
 ### Template variables
 
 ```text
-${repo}                 # repository folder name (or customRepoNames mapping)
+${repo}                 # repo folder name (or customRepoNames mapping)
 ${branch}               # current Git branch ("" outside a repo)
 ${branchSuffix}         # " · ${branch}" when includeBranch is true, else ""
 ${cwd}                  # working directory of the Claude Code session
@@ -83,36 +94,77 @@ ${sessionId}            # Claude Code session id
 ${transcriptPath}       # path to the JSONL transcript
 ```
 
-## Privacy
+### Customisation examples
 
-The helper writes everything Claude Code sends it to `~/.claude-code-supernotifier/events.jsonl` and crash details to `~/.claude-code-supernotifier/errors.log`. Both files stay on your machine; nothing is uploaded.
+Open `settings.json` and paste any of these.
+
+**Quieter, prefix-style title with branch in the title:**
+
+```json
+{
+  "claudeCodeSupernotifier.titleTemplate": "🐙 ${repo} · ${branch}",
+  "claudeCodeSupernotifier.messageTemplate": "${eventLabel}",
+  "claudeCodeSupernotifier.includeBranch": false,
+  "claudeCodeSupernotifier.sound": ""
+}
+```
+
+**Show the last assistant line in the body:**
+
+```json
+{
+  "claudeCodeSupernotifier.messageTemplate": "${eventLabel}: ${lastAssistantMessage}"
+}
+```
+
+**Restrict notifications to two repos and rename one for display:**
+
+```json
+{
+  "claudeCodeSupernotifier.allowedRepos": ["acme-app", "acme-api-internal"],
+  "claudeCodeSupernotifier.customRepoNames": {
+    "acme-api-internal": "API"
+  }
+}
+```
+
+**Different sound for permission prompts vs. completion:** SuperNotifier uses a single `sound` setting, but you can lean on macOS Focus rules instead — group critical alerts under "permission_prompt" via `${notificationType}`:
+
+```json
+{
+  "claudeCodeSupernotifier.titleTemplate": "${notificationType:-Claude}: ${repo}",
+  "claudeCodeSupernotifier.sound": "Submarine"
+}
+```
+
+**Disable click-to-focus** (useful if you handle window switching yourself, e.g. via Raycast):
+
+```json
+{
+  "claudeCodeSupernotifier.focusOnClick": false
+}
+```
 
 ## Troubleshooting
 
-- **No notification appears:** check System Settings &rarr; Notifications &rarr; **Claude Code SuperNotifier** and ensure notifications are allowed.
-- **Click does nothing:** make sure the `code` CLI is on your `PATH` (or set `claudeCodeSupernotifier.editorCliPath`).
-- **Hooks not firing:** run `Claude Code SuperNotifier: Install Claude Hooks` again, then check `~/.claude/settings.json` for an entry that points to `~/.claude-code-supernotifier/hook.js`.
+- **No notification appears.** Open *System Settings → Notifications → Claude Code SuperNotifier* and ensure notifications are allowed. Then run `Claude Code SuperNotifier: Test macOS Notification`.
+- **Click does nothing.** Make sure the [Claude Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) VS Code extension is installed in the target window — `claudeOpenSessionCommand` resolves to one of its commands.
+- **Hooks not firing.** Re-run `Claude Code SuperNotifier: Install Claude Hooks`, then check `~/.claude/settings.json` for an entry pointing to `~/.claude-code-supernotifier/hook.js`.
+- **Inspect what the helper saw.** `tail -f ~/.claude-code-supernotifier/events.jsonl` and `~/.claude-code-supernotifier/errors.log`.
 
 ## Development
 
 ```sh
 pnpm install
-pnpm run watch        # esbuild + tsgo --noEmit watchers in parallel
+pnpm run watch        # parallel esbuild + tsgo watchers
 pnpm run lint         # oxlint
-pnpm run typecheck    # tsgo (TypeScript Native preview)
+pnpm run typecheck    # tsgo
 pnpm test             # vitest
 pnpm run package      # production bundle (lint + typecheck + test + esbuild)
 pnpm run vsce:package # build .vsix
 ```
 
-The repo uses:
-
-- **oxc** (`oxlint` for linting, `oxfmt` for formatting).
-- **lefthook** for pre-commit hooks (`pnpm exec lefthook install` once after cloning).
-- **tsgo** (`@typescript/native-preview`) for fast type-checking.
-- **vitest** for unit tests.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor flow.
+See [CLAUDE.md](CLAUDE.md) for the agent / contributor rules and [CONTRIBUTING.md](CONTRIBUTING.md) for the release flow.
 
 ## License
 

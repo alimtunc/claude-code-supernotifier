@@ -8,12 +8,9 @@ export interface SupernotifierConfig {
   allowedRepos: string[];
   customRepoNames: Record<string, string>;
   focusOnClick: boolean;
-  editorUriScheme: string;
-  extensionUriAuthority: string;
   notifierBinaryPath: string;
   claudeOpenSessionCommand: string;
   claudeFocusCommand: string;
-  editorCliPath: string;
 }
 
 export interface ClaudeHookCommand {

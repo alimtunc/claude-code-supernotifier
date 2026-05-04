@@ -22,10 +22,7 @@ export interface HookConfig {
   allowedRepos?: string[];
   customRepoNames?: Record<string, string>;
   focusOnClick?: boolean;
-  editorUriScheme?: string;
-  extensionUriAuthority?: string;
   notifierBinaryPath?: string;
-  editorCliPath?: string;
 }
 
 export interface NormalisedEvent {
@@ -39,7 +36,6 @@ export interface NormalisedEvent {
   sessionId: string;
   transcriptPath: string;
   workspaceRoot: string;
-  focusUri: string;
   clickedPath: string;
   signalPath: string;
   title: string;

@@ -7,10 +7,6 @@ export const FOCUS_STATE_DIR_NAME = 'focus-state';
 export const SIGNAL_FILE_NAME = 'signal.json';
 export const CLICKED_FILE_NAME = 'clicked';
 
-export const PUBLISHER = 'alimtunc';
-export const EXTENSION_ID = 'claude-code-supernotifier';
-export const EXTENSION_URI_AUTHORITY = `${PUBLISHER}.${EXTENSION_ID}`;
-
 export const CLAUDE_SETTINGS_DIRNAME = '.claude';
 export const CLAUDE_SETTINGS_FILENAME = 'settings.json';
 

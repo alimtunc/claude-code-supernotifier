@@ -10,7 +10,15 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/extension.ts', 'src/commands.ts', 'src/clickSignals.ts']
+      exclude: [
+        'src/**/*.test.ts',
+        'src/extension.ts',
+        'src/commands.ts',
+        'src/clickSignals.ts',
+        'src/notifierApp.ts',
+        'src/runtimeFiles.ts',
+        'src/focus.ts'
+      ]
     }
   }
 });

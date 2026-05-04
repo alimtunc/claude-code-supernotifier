@@ -6,5 +6,3 @@ export const COMMAND_IDS = {
   testNotification: `${CONFIG_SECTION}.testNotification`,
   openSettings: `${CONFIG_SECTION}.openSettings`
 } as const;
-
-export const FOCUS_URI_PATH = '/focus';

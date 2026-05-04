@@ -19,7 +19,6 @@ const baseEvent: NormalisedEvent = {
   sessionId: 'sess-1',
   transcriptPath: '/tmp/repo/.transcript',
   workspaceRoot: '/tmp/repo',
-  focusUri: '',
   clickedPath: '/tmp/state/clicked',
   signalPath: '/tmp/state/signal.json',
   title: 'Claude: repo',
@@ -68,8 +67,7 @@ describe('notifyMacOS', () => {
     const config: HookConfig = {
       notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
       sound: 'Glass',
-      focusOnClick: true,
-      editorCliPath: '/usr/local/bin/code'
+      focusOnClick: true
     };
 
     notifyMacOS(baseEvent, config);
@@ -89,8 +87,6 @@ describe('notifyMacOS', () => {
     expect(args).toContain('/tmp/state/signal.json');
     expect(args).toContain('--click-touch');
     expect(args).toContain('/tmp/state/clicked');
-    expect(args).not.toContain('--click-open');
-    expect(args).not.toContain('--editor-cli');
   });
 
   it('omits click-touch when focusOnClick is false', () => {
