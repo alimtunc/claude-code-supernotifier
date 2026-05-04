@@ -24,9 +24,8 @@ export interface HookConfig {
   focusOnClick?: boolean;
   editorUriScheme?: string;
   extensionUriAuthority?: string;
-  terminalNotifierPath?: string;
+  notifierBinaryPath?: string;
   editorCliPath?: string;
-  senderBundleId?: string;
 }
 
 export interface NormalisedEvent {

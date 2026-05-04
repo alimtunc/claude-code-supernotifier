@@ -3,69 +3,48 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { HookConfig, NormalisedEvent } from './types';
 
-const NOTIFIER_TIMEOUT_MS = 5000;
-
 export function notifyMacOS(event: NormalisedEvent, config: HookConfig): void {
   if (process.platform !== 'darwin') {
     return;
   }
-
-  if (
-    config.focusOnClick !== false &&
-    config.terminalNotifierPath &&
-    fs.existsSync(config.terminalNotifierPath)
-  ) {
-    notifyWithTerminalNotifier(event, config);
+  const binary = config.notifierBinaryPath;
+  if (!binary) {
     return;
   }
 
-  notifyWithOsascript(event.title, event.message, config.sound);
-}
-
-function notifyWithTerminalNotifier(event: NormalisedEvent, config: HookConfig): void {
   writeSignal(event);
 
-  const args = ['-title', event.title, '-message', event.message, '-group', event.sessionId || event.cwd];
-
-  if (config.sound) {
-    args.push('-sound', config.sound);
-  }
-
-  if (config.senderBundleId) {
-    args.push('-sender', config.senderBundleId);
-  }
-
-  const executeCommand = createClickCommand(event, config);
-  if (executeCommand) {
-    args.push('-execute', executeCommand);
-  } else if (event.focusUri) {
-    args.push('-open', event.focusUri);
-  }
-
-  const result = cp.spawnSync(config.terminalNotifierPath ?? '', args, {
-    encoding: 'utf8',
-    timeout: NOTIFIER_TIMEOUT_MS
-  });
-
-  if (result.error || result.status !== 0) {
-    notifyWithOsascript(event.title, event.message, config.sound);
-  }
-}
-
-function notifyWithOsascript(title: string, message: string, sound: string | undefined): void {
-  const parts = [
-    `display notification ${appleScriptString(message)}`,
-    `with title ${appleScriptString(title)}`
+  const args = [
+    '--title',
+    event.title,
+    '--message',
+    event.message,
+    '--group',
+    event.sessionId || event.cwd,
+    '--signal-path',
+    event.signalPath
   ];
 
-  if (sound) {
-    parts.push(`sound name ${appleScriptString(sound)}`);
+  if (config.sound) {
+    args.push('--sound', config.sound);
   }
 
-  cp.spawnSync('/usr/bin/osascript', ['-e', parts.join(' ')], {
-    encoding: 'utf8',
-    timeout: NOTIFIER_TIMEOUT_MS
-  });
+  if (config.focusOnClick !== false && event.workspaceRoot) {
+    if (event.clickedPath) {
+      args.push('--click-touch', event.clickedPath);
+    }
+    args.push('--click-open', event.workspaceRoot);
+    if (config.editorCliPath) {
+      args.push('--editor-cli', config.editorCliPath);
+    }
+  }
+
+  cp.spawn(binary, args, {
+    detached: true,
+    stdio: 'ignore'
+  }).unref();
+  // spawn (not spawnSync): the hook returns immediately while the notifier
+  // waits up to its --timeout for a click.
 }
 
 function writeSignal(event: NormalisedEvent): void {
@@ -89,23 +68,6 @@ function writeSignal(event: NormalisedEvent): void {
       'utf8'
     );
   } catch {
-    // The notification will still fire; the click signal is best-effort.
+    // Best-effort.
   }
-}
-
-function createClickCommand(event: NormalisedEvent, config: HookConfig): string {
-  if (!event.clickedPath || !event.workspaceRoot) {
-    return '';
-  }
-
-  const editorCliPath = config.editorCliPath || 'code';
-  return `/usr/bin/touch ${shellQuote(event.clickedPath)} && ${shellQuote(editorCliPath)} ${shellQuote(event.workspaceRoot)}`;
-}
-
-function appleScriptString(value: string): string {
-  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
-}
-
-function shellQuote(value: string): string {
-  return `'${value.replace(/'/g, `'\\''`)}'`;
 }
