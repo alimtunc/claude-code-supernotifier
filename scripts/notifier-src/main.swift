@@ -109,8 +109,6 @@ authGroup.wait()
 
 if args.prime { exit(0) }
 
-let exitGroup = DispatchGroup()
-exitGroup.enter()
 var didFire = false
 let lock = NSLock()
 let delegate = Delegate(onClick: {
@@ -120,7 +118,7 @@ let delegate = Delegate(onClick: {
     lock.unlock()
     if !already {
         runClickActions(args)
-        exitGroup.leave()
+        exit(0)
     }
 })
 center.delegate = delegate
@@ -139,20 +137,18 @@ if let g = args.group, !g.isEmpty {
 }
 
 let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-let postGroup = DispatchGroup()
-postGroup.enter()
-center.add(request) { _ in postGroup.leave() }
-postGroup.wait()
+center.add(request) { _ in }
 
-DispatchQueue.global().asyncAfter(deadline: .now() + args.timeout) {
+DispatchQueue.main.asyncAfter(deadline: .now() + args.timeout) {
     lock.lock()
     let already = didFire
     didFire = true
     lock.unlock()
     if !already {
-        exitGroup.leave()
+        exit(0)
     }
 }
 
-exitGroup.wait()
-exit(0)
+// Drains the main dispatch queue so UNUserNotificationCenterDelegate
+// callbacks (which target the main queue) can fire on click. Never returns.
+dispatchMain()
