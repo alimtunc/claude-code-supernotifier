@@ -9,7 +9,6 @@ import {
 } from './claudeHooks';
 import { CONFIG_SECTION } from './constants';
 import { writeRuntimeFiles } from './runtimeFiles';
-import { findMacBinary } from './shared/binaries';
 import { appDir, helperPath } from './shared/paths';
 
 const HELPER_TIMEOUT_MS = 5000;
@@ -83,64 +82,6 @@ export async function testNotification(context: vscode.ExtensionContext): Promis
 
 export async function openSettings(): Promise<void> {
   await vscode.commands.executeCommand('workbench.action.openSettings', CONFIG_SECTION);
-}
-
-export async function configureMacNotifier(context: vscode.ExtensionContext): Promise<void> {
-  if (process.platform !== 'darwin') {
-    vscode.window.showInformationMessage(
-      'Claude Code SuperNotifier macOS notifier setup is only needed on macOS.'
-    );
-    return;
-  }
-
-  const terminalNotifier = findMacBinary('terminal-notifier');
-  if (terminalNotifier) {
-    const choice = await vscode.window.showInformationMessage(
-      `terminal-notifier is installed at ${terminalNotifier}`,
-      'Test Notification',
-      'Open Notification Settings'
-    );
-
-    if (choice === 'Test Notification') {
-      await testNotification(context);
-    } else if (choice === 'Open Notification Settings') {
-      openMacNotificationSettings();
-    }
-    return;
-  }
-
-  const choice = await vscode.window.showInformationMessage(
-    'Claude Code SuperNotifier needs Homebrew terminal-notifier for clickable macOS banners.',
-    'Install',
-    'Open Settings'
-  );
-
-  if (choice === 'Install') {
-    installTerminalNotifier();
-  } else if (choice === 'Open Settings') {
-    openMacNotificationSettings();
-  }
-}
-
-function installTerminalNotifier(): void {
-  const brew = findMacBinary('brew');
-  if (!brew) {
-    vscode.window.showWarningMessage(
-      'Homebrew was not found. Install terminal-notifier manually, then run "Configure macOS terminal-notifier" again.'
-    );
-    return;
-  }
-
-  const terminal = vscode.window.createTerminal('Claude Code SuperNotifier Setup');
-  terminal.show();
-  terminal.sendText(`${brew} install terminal-notifier`);
-}
-
-function openMacNotificationSettings(): void {
-  cp.spawn('open', ['x-apple.systempreferences:com.apple.preference.notifications'], {
-    detached: true,
-    stdio: 'ignore'
-  }).unref();
 }
 
 function getWorkspaceCwd(): string {

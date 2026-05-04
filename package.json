@@ -20,7 +20,6 @@
     "anthropic",
     "notifications",
     "macos",
-    "terminal-notifier",
     "hooks",
     "productivity"
   ],
@@ -88,11 +87,6 @@
         "command": "claudeCodeSupernotifier.testNotification",
         "category": "Claude Code SuperNotifier",
         "title": "Test macOS Notification"
-      },
-      {
-        "command": "claudeCodeSupernotifier.configureMacNotifier",
-        "category": "Claude Code SuperNotifier",
-        "title": "Configure macOS terminal-notifier"
       },
       {
         "command": "claudeCodeSupernotifier.openSettings",
@@ -165,11 +159,6 @@
           "type": "string",
           "default": "",
           "markdownDescription": "Optional editor CLI path used to focus the workspace on notification click. Empty auto-detects the VS Code `code` CLI."
-        },
-        "claudeCodeSupernotifier.senderBundleId": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Optional macOS bundle identifier shown as the notification sender. Leave empty to use the bundled SuperNotifier helper app (octopus icon). Set to a custom bundle id (e.g. `com.microsoft.VSCode`) to inherit another app's icon."
         }
       }
     }
