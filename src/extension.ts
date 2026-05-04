@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './commands';
 import { startClickSignalWatcher } from './clickSignals';
 import { COMMAND_IDS, CONFIG_SECTION } from './constants';
+import { ensureNotifierApp } from './notifierApp';
 import { writeRuntimeFiles } from './runtimeFiles';
 import { SupernotifierUriHandler } from './uriHandler';
 
@@ -24,6 +25,7 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
+  ensureNotifierApp(context);
   writeRuntimeFiles(context);
   startClickSignalWatcher(context);
 }

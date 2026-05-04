@@ -44,6 +44,7 @@
     "lint:fix": "oxlint --fix",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
+    "build:notifier-app": "tsx scripts/build-notifier-app.ts",
     "compile": "pnpm run typecheck && node esbuild.js",
     "watch": "run-p watch:*",
     "watch:typecheck": "tsgo --noEmit --watch --project tsconfig.json",
@@ -67,6 +68,7 @@
     "npm-run-all": "^4.1.5",
     "oxfmt": "^0.47.0",
     "oxlint": "^1.62.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.2",
     "vitest": "^2.1.9"
   },
@@ -167,7 +169,7 @@
         "claudeCodeSupernotifier.senderBundleId": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Optional macOS bundle identifier shown as the notification sender. Leave empty to use `terminal-notifier` itself, which is the most reliable choice."
+          "markdownDescription": "Optional macOS bundle identifier shown as the notification sender. Leave empty to use the bundled SuperNotifier helper app (octopus icon). Set to a custom bundle id (e.g. `com.microsoft.VSCode`) to inherit another app's icon."
         }
       }
     }
