@@ -43,8 +43,9 @@ rm -rf \
 echo "==> Installing ${VSIX}"
 code --install-extension "${VSIX}" --force
 
-echo "==> Force-copying dist/extension.js (works around VSCode silently keeping stale dist)"
+echo "==> Force-copying dist/{extension,hook}.js (works around VSCode silently keeping stale dist)"
 unzip -p "${VSIX}" extension/dist/extension.js > "${EXT_DIR}/dist/extension.js"
+unzip -p "${VSIX}" extension/dist/hook.js > "${EXT_DIR}/dist/hook.js"
 
 cat <<EOF
 
