@@ -43,3 +43,4 @@ yarn.lock
 **/*.test.js
 **/__tests__/**
 media/icon.svg
+dist/e2e-install.cjs

@@ -4,7 +4,7 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: '*.{ts,js,json,jsonc}'
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
       run: pnpm exec oxlint {staged_files}
       stage_fixed: true
     format:

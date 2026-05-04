@@ -32,6 +32,10 @@
     "node": ">=20"
   },
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onUri"
+  ],
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "typecheck": "tsgo --noEmit",
@@ -49,6 +53,8 @@
     "package": "pnpm run lint && pnpm run typecheck && pnpm run test && node esbuild.js --production",
     "vsce:package": "pnpm run package && vsce package --no-dependencies",
     "vsce:publish": "pnpm run package && vsce publish --no-dependencies",
+    "vsce:install": "pnpm run vsce:package && code --install-extension claude-code-supernotifier-$npm_package_version.vsix --force",
+    "vsce:uninstall": "code --uninstall-extension alimtunc.claude-code-supernotifier",
     "vscode:prepublish": "pnpm run package"
   },
   "devDependencies": {

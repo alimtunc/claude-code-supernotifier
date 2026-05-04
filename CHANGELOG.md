@@ -22,7 +22,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Removed
 
 - Unused `node-notifier` dependency.
-- Redundant `activationEvents` (auto-derived from `contributes.commands` since VS Code 1.74).
+
+### Fixed
+
+- Restored explicit `activationEvents: ["onStartupFinished", "onUri"]`. Without it, the extension only activated on the first command invocation, so the runtime helper and FileSystemWatcher were not initialised on startup.
 
 ## [0.0.1] - 2026-04-01
 
