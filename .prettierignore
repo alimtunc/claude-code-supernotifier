@@ -1,6 +1,0 @@
-dist/
-out/
-coverage/
-node_modules/
-*.vsix
-pnpm-lock.yaml

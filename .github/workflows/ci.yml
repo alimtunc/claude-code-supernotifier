@@ -32,6 +32,9 @@ jobs:
       - name: Lint (oxlint)
         run: pnpm run lint
 
+      - name: Format check (oxfmt)
+        run: pnpm run format:check
+
       - name: Typecheck (tsgo)
         run: pnpm run typecheck
 

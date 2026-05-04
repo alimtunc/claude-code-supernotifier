@@ -111,7 +111,7 @@ pnpm run vsce:package # build .vsix
 
 The repo uses:
 
-- **oxc** (`oxlint`) for linting and **prettier** for formatting.
+- **oxc** (`oxlint` for linting, `oxfmt` for formatting).
 - **lefthook** for pre-commit hooks (`pnpm exec lefthook install` once after cloning).
 - **tsgo** (`@typescript/native-preview`) for fast type-checking.
 - **vitest** for unit tests.

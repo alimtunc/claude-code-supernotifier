@@ -8,7 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Added
 
-- Project bootstrap with `oxlint` (lint + format), `lefthook` (pre-commit) and `tsgo` (`@typescript/native-preview`) typecheck.
+- Project bootstrap with `oxlint` (lint), `oxfmt` (format), `lefthook` (pre-commit) and `tsgo` (`@typescript/native-preview`) typecheck.
 - Vitest unit tests for pure logic (hook merge, JSON I/O, URI handler, template rendering).
 - GitHub Actions CI: lint, typecheck, test, package.
 

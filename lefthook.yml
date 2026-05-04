@@ -8,8 +8,8 @@ pre-commit:
       run: pnpm exec oxlint {staged_files}
       stage_fixed: true
     format:
-      glob: '*.{ts,js,json,jsonc,md,yml,yaml}'
-      run: pnpm exec prettier --write {staged_files}
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc}'
+      run: pnpm exec oxfmt {staged_files}
       stage_fixed: true
     typecheck:
       glob: '*.{ts,tsx}'

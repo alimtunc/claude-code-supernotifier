@@ -49,13 +49,13 @@ Open the project in VS Code and press `F5` to launch an Extension Development Ho
 
 The same checks run locally and in CI:
 
-| Tool       | Command                        | Purpose                                                             |
-| ---------- | ------------------------------ | ------------------------------------------------------------------- |
-| `oxlint`   | `pnpm run lint`                | Lint TypeScript / JavaScript / JSON.                                |
-| `prettier` | `pnpm exec prettier --check .` | Formatting check.                                                   |
-| `tsgo`     | `pnpm run typecheck`           | TypeScript native typecheck (`@typescript/native-preview`).         |
-| `vitest`   | `pnpm test`                    | Unit tests for pure modules.                                        |
-| `esbuild`  | `pnpm run package`             | Production bundle of both `extension.js` and `supernotify-hook.js`. |
+| Tool      | Command                 | Purpose                                                             |
+| --------- | ----------------------- | ------------------------------------------------------------------- |
+| `oxlint`  | `pnpm run lint`         | Lint TypeScript / JavaScript / JSON.                                |
+| `oxfmt`   | `pnpm run format:check` | Formatting check.                                                   |
+| `tsgo`    | `pnpm run typecheck`    | TypeScript native typecheck (`@typescript/native-preview`).         |
+| `vitest`  | `pnpm test`             | Unit tests for pure modules.                                        |
+| `esbuild` | `pnpm run package`      | Production bundle of both `extension.js` and `supernotify-hook.js`. |
 
 `pnpm run package` chains lint, typecheck, tests and the bundler &mdash; mirror it locally before opening a PR.
 
@@ -63,8 +63,8 @@ The same checks run locally and in CI:
 
 The project uses [lefthook](https://lefthook.dev/). Pre-commit will:
 
-1. Run `oxlint` on staged TS/JS/JSON files.
-2. Run `prettier --write` on staged files (auto-fixes).
+1. Run `oxlint` on staged TS/JS files.
+2. Run `oxfmt` on staged TS/JS/JSON files (auto-fixes).
 3. Run `tsgo --noEmit` on the whole project.
 
 Pre-push runs the test suite.
