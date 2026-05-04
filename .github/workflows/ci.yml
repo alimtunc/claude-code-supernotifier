@@ -46,8 +46,8 @@ jobs:
 
       - name: Verify hook bundle is executable
         run: |
-          test -f dist/supernotify-hook.js
-          head -1 dist/supernotify-hook.js | grep -q '^#!/usr/bin/env node'
+          test -f dist/hook.js
+          head -1 dist/hook.js | grep -q '^#!/usr/bin/env node'
 
       - name: Package VSIX
         run: pnpm exec vsce package --no-dependencies --out claude-code-supernotifier.vsix

@@ -7,7 +7,7 @@ import {
 } from './claudeHooks';
 import type { ClaudeSettings } from './types';
 
-const COMMAND = quoteForShell('/Users/alice/.supernotify/supernotify-hook.js');
+const COMMAND = quoteForShell('/Users/alice/.claude-code-supernotifier/hook.js');
 
 describe('quoteForShell', () => {
   it('wraps the path in single quotes', () => {

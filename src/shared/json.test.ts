@@ -8,7 +8,7 @@ describe('json I/O helpers', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'supernotify-json-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ccsn-json-'));
   });
 
   afterEach(() => {

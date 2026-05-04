@@ -26,7 +26,7 @@ describe('paths', () => {
   });
 
   it('appDir lives under the user home', () => {
-    expect(appDir.endsWith(path.join('.supernotify'))).toBe(true);
+    expect(appDir.endsWith(path.join('.claude-code-supernotifier'))).toBe(true);
   });
 
   it('helper, config and log paths sit inside appDir', () => {

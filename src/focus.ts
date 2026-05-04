@@ -34,7 +34,7 @@ export async function focusClaudeSession(request: FocusRequest): Promise<void> {
       return;
     }
     const message = error instanceof Error ? error.message : String(error);
-    vscode.window.showWarningMessage(`Supernotify could not focus Claude Code: ${message}`);
+    vscode.window.showWarningMessage(`Claude Code SuperNotifier could not focus Claude Code: ${message}`);
   }
 }
 

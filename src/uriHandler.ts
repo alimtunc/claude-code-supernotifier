@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { FOCUS_URI_PATH } from './constants';
 import { focusClaudeSession, type FocusRequest } from './focus';
 
-export class SupernotifyUriHandler implements vscode.UriHandler {
+export class SupernotifierUriHandler implements vscode.UriHandler {
   async handleUri(uri: vscode.Uri): Promise<void> {
     if (uri.path !== FOCUS_URI_PATH) {
       return;

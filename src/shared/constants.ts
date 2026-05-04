@@ -1,5 +1,5 @@
-export const APP_DIR_NAME = '.supernotify';
-export const HELPER_SCRIPT_NAME = 'supernotify-hook.js';
+export const APP_DIR_NAME = '.claude-code-supernotifier';
+export const HELPER_SCRIPT_NAME = 'hook.js';
 export const CONFIG_FILE_NAME = 'config.json';
 export const EVENT_LOG_NAME = 'events.jsonl';
 export const ERROR_LOG_NAME = 'errors.log';

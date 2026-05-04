@@ -8,7 +8,7 @@ describe('findMacBinary', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'supernotify-bin-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ccsn-bin-'));
   });
 
   afterEach(() => {

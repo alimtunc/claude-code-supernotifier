@@ -1,4 +1,4 @@
-export interface SupernotifyConfig {
+export interface SupernotifierConfig {
   notifyOnStop: boolean;
   notifyOnAttention: boolean;
   sound: string;

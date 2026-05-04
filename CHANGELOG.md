@@ -16,6 +16,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 - Renamed extension to **Claude Code SuperNotifier** (`alimtunc.claude-code-supernotifier`).
 - Migrated all command IDs and configuration keys from `supernotify.*` to `claudeCodeSupernotifier.*`.
+- Renamed runtime directory from `~/.supernotify/` to `~/.claude-code-supernotifier/` and helper script from `supernotify-hook.js` to `hook.js`.
+- Renamed remaining `Supernotify*` TypeScript identifiers to `Supernotifier*` (`SupernotifyConfig` &rarr; `SupernotifierConfig`, `SupernotifyUriHandler` &rarr; `SupernotifierUriHandler`).
 - Replaced 500 ms polling with `vscode.workspace.createFileSystemWatcher` for click signals.
 - Centralised binary discovery, command IDs and runtime paths to remove duplication.
 

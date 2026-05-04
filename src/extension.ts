@@ -3,7 +3,7 @@ import * as commands from './commands';
 import { startClickSignalWatcher } from './clickSignals';
 import { COMMAND_IDS, CONFIG_SECTION } from './constants';
 import { writeRuntimeFiles } from './runtimeFiles';
-import { SupernotifyUriHandler } from './uriHandler';
+import { SupernotifierUriHandler } from './uriHandler';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext): void {
       commands.configureMacNotifier(context)
     ),
     vscode.commands.registerCommand(COMMAND_IDS.openSettings, () => commands.openSettings()),
-    vscode.window.registerUriHandler(new SupernotifyUriHandler()),
+    vscode.window.registerUriHandler(new SupernotifierUriHandler()),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration(CONFIG_SECTION)) {
         writeRuntimeFiles(context);

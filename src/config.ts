@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import { CONFIG_SECTION } from './constants';
 import { findMacBinary } from './shared/binaries';
 import { DEFAULTS, EXTENSION_URI_AUTHORITY } from './shared/constants';
-import type { SupernotifyConfig } from './types';
+import type { SupernotifierConfig } from './types';
 
-export function getRuntimeConfig(): SupernotifyConfig {
+export function getRuntimeConfig(): SupernotifierConfig {
   const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
 
   return {

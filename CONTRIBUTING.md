@@ -48,13 +48,13 @@ Open the project in VS Code and press `F5` to launch an Extension Development Ho
 
 The same checks run locally and in CI:
 
-| Tool      | Command                 | Purpose                                                             |
-| --------- | ----------------------- | ------------------------------------------------------------------- |
-| `oxlint`  | `pnpm run lint`         | Lint TypeScript / JavaScript / JSON.                                |
-| `oxfmt`   | `pnpm run format:check` | Formatting check.                                                   |
-| `tsgo`    | `pnpm run typecheck`    | TypeScript native typecheck (`@typescript/native-preview`).         |
-| `vitest`  | `pnpm test`             | Unit tests for pure modules.                                        |
-| `esbuild` | `pnpm run package`      | Production bundle of both `extension.js` and `supernotify-hook.js`. |
+| Tool      | Command                 | Purpose                                                     |
+| --------- | ----------------------- | ----------------------------------------------------------- |
+| `oxlint`  | `pnpm run lint`         | Lint TypeScript / JavaScript / JSON.                        |
+| `oxfmt`   | `pnpm run format:check` | Formatting check.                                           |
+| `tsgo`    | `pnpm run typecheck`    | TypeScript native typecheck (`@typescript/native-preview`). |
+| `vitest`  | `pnpm test`             | Unit tests for pure modules.                                |
+| `esbuild` | `pnpm run package`      | Production bundle of both `extension.js` and `hook.js`.     |
 
 `pnpm run package` chains lint, typecheck, tests and the bundler &mdash; mirror it locally before opening a PR.
 
@@ -85,4 +85,4 @@ Open an issue with:
 - macOS version
 - VS Code version
 - Output of `Claude Code SuperNotifier: Test macOS Notification`
-- Last few lines of `~/.supernotify/errors.log`
+- Last few lines of `~/.claude-code-supernotifier/errors.log`

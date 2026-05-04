@@ -49,7 +49,7 @@ const extensionOptions = {
 const hookOptions = {
   ...sharedOptions,
   entryPoints: ['src/hook/index.ts'],
-  outfile: 'dist/supernotify-hook.js',
+  outfile: 'dist/hook.js',
   banner: { js: '#!/usr/bin/env node' }
 };
 

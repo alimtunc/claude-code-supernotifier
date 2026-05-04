@@ -40,14 +40,14 @@ The marketplace already has plenty of "Claude notifier" extensions. SuperNotifie
 The extension writes a self-contained helper to:
 
 ```
-~/.supernotify/supernotify-hook.js
+~/.claude-code-supernotifier/hook.js
 ```
 
 It then registers the helper as a [Claude Code hook](https://docs.claude.com/en/docs/claude-code/hooks) in `~/.claude/settings.json`. Whenever Claude Code emits a `Stop`, `Notification` or `PermissionRequest` event, the helper:
 
 1. Reads the JSON payload from `stdin`.
 2. Enriches it with repository and Git branch information.
-3. Logs the event to `~/.supernotify/events.jsonl` for debugging.
+3. Logs the event to `~/.claude-code-supernotifier/events.jsonl` for debugging.
 4. Displays a clickable macOS banner via `terminal-notifier` (falling back to `osascript` when needed).
 5. Drops a tiny `clicked` file when the notification is acted on, which the extension watches with `vscode.workspace.createFileSystemWatcher` to focus the right session.
 
@@ -89,13 +89,13 @@ ${transcriptPath}       # path to the JSONL transcript
 
 ## Privacy
 
-The helper writes everything Claude Code sends it to `~/.supernotify/events.jsonl` and crash details to `~/.supernotify/errors.log`. Both files stay on your machine; nothing is uploaded.
+The helper writes everything Claude Code sends it to `~/.claude-code-supernotifier/events.jsonl` and crash details to `~/.claude-code-supernotifier/errors.log`. Both files stay on your machine; nothing is uploaded.
 
 ## Troubleshooting
 
 - **No notification appears:** check System Settings &rarr; Notifications &rarr; `terminal-notifier` (or your custom `senderBundleId`). macOS keys notification permissions to the bundle id.
 - **Click does nothing:** make sure the `code` CLI is on your `PATH` (or set `claudeCodeSupernotifier.editorCliPath`).
-- **Hooks not firing:** run `Claude Code SuperNotifier: Install Claude Hooks` again, then check `~/.claude/settings.json` for an entry that points to `~/.supernotify/supernotify-hook.js`.
+- **Hooks not firing:** run `Claude Code SuperNotifier: Install Claude Hooks` again, then check `~/.claude/settings.json` for an entry that points to `~/.claude-code-supernotifier/hook.js`.
 
 ## Development
 

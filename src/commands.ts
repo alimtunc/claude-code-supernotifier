@@ -53,7 +53,7 @@ export async function testNotification(context: vscode.ExtensionContext): Promis
   writeRuntimeFiles(context);
 
   const sample = {
-    session_id: 'supernotify-test',
+    session_id: 'claude-code-supernotifier-test',
     transcript_path: path.join(appDir, 'test-transcript.jsonl'),
     cwd: getWorkspaceCwd(),
     permission_mode: 'default',

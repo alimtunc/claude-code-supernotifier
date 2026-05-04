@@ -11,7 +11,10 @@ const KNOWN_THIRD_PARTY_HOOK_FRAGMENTS = [
   'dimokol.claude-notifications',
   'claude-notifications',
   '/notify-input-needed.sh',
-  '/notify-stop.sh'
+  '/notify-stop.sh',
+  // Legacy SuperNotifier paths from versions <= 0.0.1.
+  '/.supernotify/supernotify-hook.js',
+  '/.supernotify/'
 ];
 
 export function installClaudeHooks(): void {
