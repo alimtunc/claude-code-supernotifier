@@ -1,0 +1,45 @@
+# Folders that never ship
+.git/**
+.github/**
+.vscode/**
+.vscode-test/**
+.lefthook/**
+.pnpm-store/**
+node_modules/**
+src/**
+out/**
+coverage/**
+docs/**
+scripts/**
+
+# Stale vendor directory — the extension uses the system terminal-notifier only.
+resources/**
+
+# Configs not needed at runtime
+.editorconfig
+.gitignore
+.lefthook-local.yml
+.npmrc
+.oxlintrc.json
+.prettierignore
+.prettierrc.json
+esbuild.js
+lefthook.yml
+tsconfig.json
+tsconfig.*.json
+vitest.config.ts
+vitest.config.*.ts
+
+# Lockfile and intermediate artefacts
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+*.tsbuildinfo
+*.vsix
+
+# Source-map and test files
+**/*.map
+**/*.test.ts
+**/*.test.js
+**/__tests__/**
+media/icon.svg

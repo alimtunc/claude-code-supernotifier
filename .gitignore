@@ -1,0 +1,27 @@
+# Build output
+dist/
+out/
+*.vsix
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# TypeScript
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Editor / OS
+.DS_Store
+.idea/
+*.log
+
+# Local env
+.env
+.env.local
+.env.*.local
+
+# Lefthook local cache
+.lefthook-local.yml

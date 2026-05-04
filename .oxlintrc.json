@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "perf": "warn",
+    "suspicious": "warn",
+    "pedantic": "off",
+    "style": "off",
+    "nursery": "off"
+  },
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "rules": {
+    "no-console": "off",
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+  },
+  "ignorePatterns": ["dist/**", "out/**", "node_modules/**", "coverage/**", "*.vsix"],
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "src/test/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["esbuild.js"],
+      "env": {
+        "node": true
+      }
+    }
+  ]
+}

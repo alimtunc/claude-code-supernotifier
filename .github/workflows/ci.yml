@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint - Typecheck - Test - Package
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (oxlint)
+        run: pnpm run lint
+
+      - name: Typecheck (tsgo)
+        run: pnpm run typecheck
+
+      - name: Tests (vitest)
+        run: pnpm test -- --reporter=default
+
+      - name: Build (production bundle)
+        run: node esbuild.js --production
+
+      - name: Verify hook bundle is executable
+        run: |
+          test -f dist/supernotify-hook.js
+          head -1 dist/supernotify-hook.js | grep -q '^#!/usr/bin/env node'
+
+      - name: Package VSIX
+        run: pnpm exec vsce package --no-dependencies --out claude-code-supernotifier.vsix
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claude-code-supernotifier-vsix
+          path: claude-code-supernotifier.vsix
+          if-no-files-found: error
+          retention-days: 14

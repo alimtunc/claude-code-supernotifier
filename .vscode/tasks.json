@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "command": "pnpm run compile",
+      "group": "build",
+      "problemMatcher": ["$tsc"],
+      "label": "pnpm: compile"
+    },
+    {
+      "label": "watch",
+      "dependsOn": ["pnpm: watch:tsc", "pnpm: watch:esbuild"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "pnpm run watch:tsc",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "pnpm: watch:tsc",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "pnpm run watch:esbuild",
+      "group": "build",
+      "problemMatcher": "$esbuild-watch",
+      "isBackground": true,
+      "label": "pnpm: watch:esbuild",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    }
+  ]
+}

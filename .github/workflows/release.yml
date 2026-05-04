@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish to VS Code Marketplace
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm test
+      - run: node esbuild.js --production
+
+      - name: Package VSIX
+        run: pnpm exec vsce package --no-dependencies --out claude-code-supernotifier.vsix
+
+      - name: Publish VSIX to marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        if: env.VSCE_PAT != ''
+        run: pnpm exec vsce publish --no-dependencies --packagePath claude-code-supernotifier.vsix
+
+      - name: Attach VSIX to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: claude-code-supernotifier.vsix
+          generate_release_notes: true

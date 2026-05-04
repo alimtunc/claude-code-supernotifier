@@ -1,0 +1,169 @@
+{
+  "name": "claude-code-supernotifier",
+  "displayName": "Claude Code SuperNotifier",
+  "description": "Native macOS notifications for Claude Code sessions: multi-window aware, click-to-focus, repo-aware templates.",
+  "version": "0.0.1",
+  "publisher": "alimtunc",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "homepage": "https://github.com/alimtunc/claude-code-supernotifier#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alimtunc/claude-code-supernotifier.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alimtunc/claude-code-supernotifier/issues"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "notifications",
+    "macos",
+    "terminal-notifier",
+    "hooks",
+    "productivity"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "engines": {
+    "vscode": "^1.90.0",
+    "node": ">=20"
+  },
+  "main": "./dist/extension.js",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "typecheck:watch": "tsgo --noEmit --watch",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxlint --fix --type-aware && prettier --write .",
+    "compile": "pnpm run typecheck && node esbuild.js",
+    "watch": "run-p watch:*",
+    "watch:typecheck": "tsgo --noEmit --watch --project tsconfig.json",
+    "watch:esbuild": "node esbuild.js --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build:icon": "node scripts/build-icon.mjs",
+    "package": "pnpm run lint && pnpm run typecheck && pnpm run test && node esbuild.js --production",
+    "vsce:package": "pnpm run package && vsce package --no-dependencies",
+    "vsce:publish": "pnpm run package && vsce publish --no-dependencies",
+    "vscode:prepublish": "pnpm run package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.24",
+    "@types/vscode": "1.90.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260504.1",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.25.0",
+    "lefthook": "^2.1.6",
+    "npm-run-all": "^4.1.5",
+    "oxlint": "^1.62.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.9"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeCodeSupernotifier.installClaudeHooks",
+        "category": "Claude Code SuperNotifier",
+        "title": "Install Claude Hooks"
+      },
+      {
+        "command": "claudeCodeSupernotifier.uninstallClaudeHooks",
+        "category": "Claude Code SuperNotifier",
+        "title": "Uninstall Claude Hooks"
+      },
+      {
+        "command": "claudeCodeSupernotifier.testNotification",
+        "category": "Claude Code SuperNotifier",
+        "title": "Test macOS Notification"
+      },
+      {
+        "command": "claudeCodeSupernotifier.configureMacNotifier",
+        "category": "Claude Code SuperNotifier",
+        "title": "Configure macOS terminal-notifier"
+      },
+      {
+        "command": "claudeCodeSupernotifier.openSettings",
+        "category": "Claude Code SuperNotifier",
+        "title": "Open Settings"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Code SuperNotifier",
+      "properties": {
+        "claudeCodeSupernotifier.notifyOnStop": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show a macOS notification when Claude Code finishes responding."
+        },
+        "claudeCodeSupernotifier.notifyOnAttention": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show a macOS notification when Claude Code needs attention (permission prompts, idle prompts)."
+        },
+        "claudeCodeSupernotifier.sound": {
+          "type": "string",
+          "default": "Glass",
+          "markdownDescription": "macOS notification sound name. Leave empty for no sound. Examples: `Glass`, `Ping`, `Submarine`."
+        },
+        "claudeCodeSupernotifier.titleTemplate": {
+          "type": "string",
+          "default": "Claude: ${repo}",
+          "markdownDescription": "Notification title template. See README for the full list of `${variables}`."
+        },
+        "claudeCodeSupernotifier.messageTemplate": {
+          "type": "string",
+          "default": "${eventLabel}${branchSuffix}",
+          "markdownDescription": "Notification body template. See README for the full list of `${variables}`."
+        },
+        "claudeCodeSupernotifier.includeBranch": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Include the current Git branch in the default notification message."
+        },
+        "claudeCodeSupernotifier.allowedRepos": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "Optional allow-list of repository folder names. Empty means all repositories."
+        },
+        "claudeCodeSupernotifier.customRepoNames": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "Optional mapping from folder name to display name shown in notifications."
+        },
+        "claudeCodeSupernotifier.focusOnClick": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Open the matching Claude Code session when clicking the macOS notification."
+        },
+        "claudeCodeSupernotifier.claudeOpenSessionCommand": {
+          "type": "string",
+          "default": "claude-vscode.editor.open",
+          "markdownDescription": "VS Code command used to open a Claude Code session by session id."
+        },
+        "claudeCodeSupernotifier.claudeFocusCommand": {
+          "type": "string",
+          "default": "claude-vscode.focus",
+          "markdownDescription": "VS Code command executed after opening a Claude Code session to bring it into focus."
+        },
+        "claudeCodeSupernotifier.editorCliPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Optional editor CLI path used to focus the workspace on notification click. Empty auto-detects the VS Code `code` CLI."
+        },
+        "claudeCodeSupernotifier.senderBundleId": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Optional macOS bundle identifier shown as the notification sender. Leave empty to use `terminal-notifier` itself, which is the most reliable choice."
+        }
+      }
+    }
+  }
+}
