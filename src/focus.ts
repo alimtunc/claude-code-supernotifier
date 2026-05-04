@@ -37,12 +37,7 @@ export async function focusClaudeSession(request: FocusRequest): Promise<void> {
 
   try {
     if (request.sessionId) {
-      await vscode.commands.executeCommand(
-        openSessionCommand,
-        request.sessionId,
-        undefined,
-        vscode.ViewColumn.Active
-      );
+      await vscode.commands.executeCommand(openSessionCommand, request.sessionId);
     } else {
       await vscode.commands.executeCommand(OPEN_LAST_COMMAND);
     }
