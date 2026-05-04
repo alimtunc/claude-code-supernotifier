@@ -12,6 +12,7 @@ There are already plenty of "Claude notifier" extensions. SuperNotifier focuses 
 
 - **Multi-session aware** — each banner is grouped per session id and routes back to the right window when clicked.
 - **Click-to-focus** — opens the right workspace and triggers the Claude Code editor command on banner click.
+- **Quiet when you're already there** — notifications are suppressed automatically when the matching VS Code window has focus.
 - **Repo-aware** — title and message templates know about the repo and current Git branch.
 - **Native** — real macOS banners under our own bundle identity, not webview/toast hacks. Zero Homebrew dependencies.
 
@@ -25,10 +26,10 @@ The bundled helper (`ClaudeCodeSupernotifier.app`) ships with the VSIX. No `brew
 
 ## Commands
 
-| Command                                              | Effect                                              |
-| ---------------------------------------------------- | --------------------------------------------------- |
-| `Claude Code SuperNotifier: Install Claude Hooks`    | Registers the helper in `~/.claude/settings.json`.  |
-| `Claude Code SuperNotifier: Uninstall Claude Hooks`  | Removes the entries managed by this extension.      |
+| Command                                              | Effect                                             |
+| ---------------------------------------------------- | -------------------------------------------------- |
+| `Claude Code SuperNotifier: Install Claude Hooks`    | Registers the helper in `~/.claude/settings.json`. |
+| `Claude Code SuperNotifier: Uninstall Claude Hooks`  | Removes the entries managed by this extension.     |
 | `Claude Code SuperNotifier: Test macOS Notification` | Sends a sample notification through the helper.    |
 | `Claude Code SuperNotifier: Open Settings`           | Opens the SuperNotifier settings section.          |
 
@@ -53,6 +54,7 @@ Claude Code  ──Stop/Notification─▶  ~/.claude-code-supernotifier/hook.js
 ```
 
 State files live in `~/.claude-code-supernotifier/`:
+
 - `hook.js` — the helper script (installed/refreshed on every activation).
 - `events.jsonl` — append-only log of every event the helper saw.
 - `errors.log` — crash details from the helper.
@@ -64,19 +66,19 @@ Nothing leaves your machine.
 
 All settings live under `claudeCodeSupernotifier.*`.
 
-| Setting                    | Default                        | Purpose                                                   |
-| -------------------------- | ------------------------------ | --------------------------------------------------------- |
-| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                       |
-| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                        |
-| `sound`                    | `Glass`                        | macOS sound name. Empty disables sound.                  |
-| `titleTemplate`            | `Claude: ${repo}`              | Notification title template.                              |
-| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                               |
-| `includeBranch`            | `true`                         | Append the current Git branch to messages.                |
-| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.        |
-| `customRepoNames`          | `{}`                           | Map folder name → display name.                          |
-| `focusOnClick`             | `true`                         | Open the matching session on click.                       |
-| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.             |
-| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.    |
+| Setting                    | Default                        | Purpose                                                |
+| -------------------------- | ------------------------------ | ------------------------------------------------------ |
+| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                    |
+| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                     |
+| `sound`                    | `Glass`                        | macOS sound name. Empty disables sound.                |
+| `titleTemplate`            | `${repo}`                      | Notification title template.                           |
+| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                            |
+| `includeBranch`            | `true`                         | Append the current Git branch to messages.             |
+| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.     |
+| `customRepoNames`          | `{}`                           | Map folder name → display name.                        |
+| `focusOnClick`             | `true`                         | Open the matching session on click.                    |
+| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.          |
+| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward. |
 
 ### Template variables
 
@@ -147,7 +149,7 @@ Open `settings.json` and paste any of these.
 
 ## Troubleshooting
 
-- **No notification appears.** Open *System Settings → Notifications → Claude Code SuperNotifier* and ensure notifications are allowed. Then run `Claude Code SuperNotifier: Test macOS Notification`.
+- **No notification appears.** Open _System Settings → Notifications → Claude Code SuperNotifier_ and ensure notifications are allowed. Then run `Claude Code SuperNotifier: Test macOS Notification`.
 - **Click does nothing.** Make sure the [Claude Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) VS Code extension is installed in the target window — `claudeOpenSessionCommand` resolves to one of its commands.
 - **Hooks not firing.** Re-run `Claude Code SuperNotifier: Install Claude Hooks`, then check `~/.claude/settings.json` for an entry pointing to `~/.claude-code-supernotifier/hook.js`.
 - **Inspect what the helper saw.** `tail -f ~/.claude-code-supernotifier/events.jsonl` and `~/.claude-code-supernotifier/errors.log`.

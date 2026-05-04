@@ -1,6 +1,7 @@
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { DEFAULTS } from '../shared/constants';
-import { getClickedPath, getSignalPath } from '../shared/paths';
+import { getClickedPath, getFocusedPath, getSignalPath } from '../shared/paths';
 import { renderTemplate, truncate } from '../shared/template';
 import { getGitBranch } from './git';
 import { findWorkspaceRoot } from './workspace';
@@ -64,6 +65,9 @@ export function normaliseEvent(input: HookInputEvent, config: HookConfig): Norma
 export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolean {
   const allowedRepos = config.allowedRepos ?? [];
   if (allowedRepos.length > 0 && !allowedRepos.includes(path.basename(event.cwd))) {
+    return false;
+  }
+  if (fs.existsSync(getFocusedPath(event.workspaceRoot))) {
     return false;
   }
   if (event.event === 'Stop') {

@@ -10,6 +10,7 @@ import {
   ERROR_LOG_NAME,
   EVENT_LOG_NAME,
   FOCUS_STATE_DIR_NAME,
+  FOCUSED_FILE_NAME,
   HELPER_SCRIPT_NAME,
   SIGNAL_FILE_NAME
 } from './constants';
@@ -36,4 +37,8 @@ export function getSignalPath(workspaceRoot: string): string {
 
 export function getClickedPath(workspaceRoot: string): string {
   return path.join(getStateDir(workspaceRoot), CLICKED_FILE_NAME);
+}
+
+export function getFocusedPath(workspaceRoot: string): string {
+  return path.join(getStateDir(workspaceRoot), FOCUSED_FILE_NAME);
 }

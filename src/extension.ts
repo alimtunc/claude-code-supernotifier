@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { startClickSignalWatcher } from './clickSignals';
 import * as commands from './commands';
 import { COMMAND_IDS, CONFIG_SECTION } from './constants';
+import { startFocusStateTracker } from './focusState';
 import { ensureNotifierApp } from './notifierApp';
 import { writeRuntimeFiles } from './runtimeFiles';
 
@@ -23,6 +24,7 @@ export function activate(context: vscode.ExtensionContext): void {
   ensureNotifierApp(context);
   writeRuntimeFiles(context);
   startClickSignalWatcher(context);
+  startFocusStateTracker(context);
 }
 
 export function deactivate(): void {}

@@ -1,6 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { normaliseEvent, shouldNotify } from './event';
 import type { HookConfig } from './types';
+
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
+  return { ...actual, existsSync: vi.fn(() => false) };
+});
+
+const { existsSync } = await import('node:fs');
+const existsSyncMock = vi.mocked(existsSync);
 
 const baseConfig: HookConfig = {
   notifyOnStop: true,
@@ -50,6 +58,10 @@ describe('shouldNotify', () => {
   const stopEvent = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo' }, baseConfig);
   const notifEvent = normaliseEvent({ hook_event_name: 'Notification', cwd: '/tmp/repo' }, baseConfig);
 
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+  });
+
   it('respects notifyOnStop', () => {
     expect(shouldNotify(stopEvent, { ...baseConfig, notifyOnStop: false })).toBe(false);
     expect(shouldNotify(stopEvent, { ...baseConfig, notifyOnStop: true })).toBe(true);
@@ -68,5 +80,15 @@ describe('shouldNotify', () => {
   it('returns false for unknown events', () => {
     const evt = normaliseEvent({ hook_event_name: 'Custom', cwd: '/tmp/repo' }, baseConfig);
     expect(shouldNotify(evt, baseConfig)).toBe(false);
+  });
+
+  it('suppresses notifications when the matching VSCode window is focused', () => {
+    existsSyncMock.mockReturnValue(true);
+    expect(shouldNotify(stopEvent, baseConfig)).toBe(false);
+  });
+
+  it('notifies when no window is focused on the workspace', () => {
+    existsSyncMock.mockReturnValue(false);
+    expect(shouldNotify(stopEvent, baseConfig)).toBe(true);
   });
 });

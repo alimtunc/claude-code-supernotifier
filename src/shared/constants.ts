@@ -6,6 +6,7 @@ export const ERROR_LOG_NAME = 'errors.log';
 export const FOCUS_STATE_DIR_NAME = 'focus-state';
 export const SIGNAL_FILE_NAME = 'signal.json';
 export const CLICKED_FILE_NAME = 'clicked';
+export const FOCUSED_FILE_NAME = 'focused';
 
 export const CLAUDE_SETTINGS_DIRNAME = '.claude';
 export const CLAUDE_SETTINGS_FILENAME = 'settings.json';
