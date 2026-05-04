@@ -37,12 +37,30 @@ function readStdinJson(): Promise<HookInputEvent> {
   });
 }
 
+// Cap the JSONL event log so it can't grow unbounded. When the file exceeds
+// EVENT_LOG_MAX_BYTES we rotate it to <name>.1 (overwriting any previous
+// rotation), so disk use stays bounded at ~2× the cap.
+const EVENT_LOG_MAX_BYTES = 2 * 1024 * 1024;
+
 function appendEvent(event: NormalisedEvent): void {
   try {
     fs.mkdirSync(appDir, { recursive: true });
+    rotateEventLogIfNeeded();
     fs.appendFileSync(eventLogPath, `${JSON.stringify(event)}\n`, 'utf8');
   } catch {
     // Logging is best-effort; never block the notification path.
+  }
+}
+
+function rotateEventLogIfNeeded(): void {
+  try {
+    if (fs.statSync(eventLogPath).size <= EVENT_LOG_MAX_BYTES) {
+      return;
+    }
+    fs.renameSync(eventLogPath, `${eventLogPath}.1`);
+  } catch {
+    // statSync ENOENT before first write, or rename race with another hook
+    // process — either way, just continue and append.
   }
 }
 
