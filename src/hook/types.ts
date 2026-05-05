@@ -16,6 +16,7 @@ export interface HookConfig {
   notifyOnStop?: boolean;
   notifyOnAttention?: boolean;
   sound?: string;
+  notificationStyle?: 'system' | 'banner';
   titleTemplate?: string;
   messageTemplate?: string;
   includeBranch?: boolean;

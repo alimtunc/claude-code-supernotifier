@@ -68,23 +68,24 @@ Nothing leaves your machine.
 
 All settings live under `claudeCodeSupernotifier.*`.
 
-| Setting                    | Default                        | Purpose                                                 |
-| -------------------------- | ------------------------------ | ------------------------------------------------------- |
-| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                     |
-| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                      |
-| `sound`                    | `Glass`                        | macOS sound name. Empty disables sound.                 |
-| `titleTemplate`            | `${repo}`                      | Notification title template.                            |
-| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                             |
-| `includeBranch`            | `true`                         | Append the current Git branch to messages.              |
-| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.      |
-| `customRepoNames`          | `{}`                           | Map folder name → display name.                         |
-| `focusOnClick`             | `true`                         | Open the matching session on click.                     |
-| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.           |
-| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.  |
-| `stopLabel`                | `Finished`                     | `${eventLabel}` text when Claude finishes a turn.       |
-| `permissionLabel`          | `Permission required`          | `${eventLabel}` text for permission prompts.            |
-| `idlePromptLabel`          | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                  |
-| `attentionLabel`           | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events. |
+| Setting                    | Default                        | Purpose                                                                                                                             |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                                                                                                 |
+| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                                                                                                  |
+| `sound`                    | `Glass`                        | macOS sound name. Empty disables sound.                                                                                             |
+| `notificationStyle`        | `system`                       | `system` honors macOS Banners/Alerts pref + keeps the notif in Notification Center. `banner` forces the legacy auto-dismiss banner. |
+| `titleTemplate`            | `${repo}`                      | Notification title template.                                                                                                        |
+| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                                                                                                         |
+| `includeBranch`            | `true`                         | Append the current Git branch to messages.                                                                                          |
+| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.                                                                                  |
+| `customRepoNames`          | `{}`                           | Map folder name → display name.                                                                                                     |
+| `focusOnClick`             | `true`                         | Open the matching session on click.                                                                                                 |
+| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.                                                                                       |
+| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.                                                                              |
+| `stopLabel`                | `Finished`                     | `${eventLabel}` text when Claude finishes a turn.                                                                                   |
+| `permissionLabel`          | `Permission required`          | `${eventLabel}` text for permission prompts.                                                                                        |
+| `idlePromptLabel`          | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                                                                                              |
+| `attentionLabel`           | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events.                                                                             |
 
 ### Template variables
 
@@ -152,6 +153,8 @@ Open `settings.json` and paste any of these.
   "claudeCodeSupernotifier.focusOnClick": false
 }
 ```
+
+**Make notifications stay until clicked:** keep `notificationStyle` at `system` (the default) and set the macOS style to **Alerts** in _System Settings → Notifications → Claude Code SuperNotifier_. With `system` the notif also lands in Notification Center, so even auto-dismissed banners can still be reviewed. Pick `banner` if you specifically want the legacy ephemeral behavior with no Notification Center entry.
 
 ## Troubleshooting
 

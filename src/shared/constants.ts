@@ -15,6 +15,7 @@ export const DEFAULTS = {
   notifyOnStop: true,
   notifyOnAttention: true,
   sound: 'Glass',
+  notificationStyle: 'system',
   titleTemplate: '${repo}',
   messageTemplate: '${eventLabel}${branchSuffix}',
   includeBranch: true,

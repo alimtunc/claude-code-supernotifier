@@ -29,6 +29,10 @@ export function notifyMacOS(event: NormalisedEvent, config: HookConfig): void {
     args.push('--sound', config.sound);
   }
 
+  if (config.notificationStyle && config.notificationStyle !== 'system') {
+    args.push('--style', config.notificationStyle);
+  }
+
   if (config.focusOnClick !== false && event.clickedPath) {
     args.push('--click-touch', event.clickedPath);
   }

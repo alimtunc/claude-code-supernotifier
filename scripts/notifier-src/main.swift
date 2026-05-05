@@ -11,6 +11,7 @@ struct Args {
     var timeout: Double = 30
     var prime: Bool = false
     var dryRun: Bool = false
+    var style: String = "system"
 }
 
 func parseArgs() -> Args {
@@ -25,6 +26,7 @@ func parseArgs() -> Args {
         case "--signal-path": if let v = it.next() { a.signalPath = v }
         case "--click-touch": if let v = it.next() { a.clickTouch = v }
         case "--timeout":     if let v = it.next(), let d = Double(v) { a.timeout = d }
+        case "--style":       if let v = it.next() { a.style = v }
         case "--prime":       a.prime = true
         case "--dry-run":     a.dryRun = true
         default: break
@@ -35,14 +37,26 @@ func parseArgs() -> Args {
 
 final class Delegate: NSObject, UNUserNotificationCenterDelegate {
     let onClick: () -> Void
-    init(onClick: @escaping () -> Void) { self.onClick = onClick }
+    let style: String
+    init(style: String, onClick: @escaping () -> Void) {
+        self.style = style
+        self.onClick = onClick
+    }
 
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler handler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        handler([.banner, .sound])
+        // 'banner' forces the legacy auto-dismiss banner only.
+        // 'system' (default) adds .list so the notif also lands in Notification Center,
+        // and lets macOS decide banner-vs-alert presentation per the user's
+        // System Settings → Notifications → Claude Code SuperNotifier preference.
+        if style == "banner" {
+            handler([.banner, .sound])
+        } else {
+            handler([.banner, .list, .sound])
+        }
     }
 
     func userNotificationCenter(
@@ -78,7 +92,8 @@ if args.dryRun {
         "signalPath": args.signalPath as Any,
         "clickTouch": args.clickTouch as Any,
         "timeout": args.timeout,
-        "prime": args.prime
+        "prime": args.prime,
+        "style": args.style
     ]
     if let data = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted]),
        let s = String(data: data, encoding: .utf8) {
@@ -104,7 +119,7 @@ if args.prime { exit(0) }
 
 var didFire = false
 let lock = NSLock()
-let delegate = Delegate(onClick: {
+let delegate = Delegate(style: args.style, onClick: {
     lock.lock()
     let already = didFire
     didFire = true

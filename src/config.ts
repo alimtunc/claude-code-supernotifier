@@ -11,6 +11,7 @@ export function getRuntimeConfig(): SupernotifierConfig {
     notifyOnStop: config.get('notifyOnStop', DEFAULTS.notifyOnStop),
     notifyOnAttention: config.get('notifyOnAttention', DEFAULTS.notifyOnAttention),
     sound: config.get('sound', DEFAULTS.sound),
+    notificationStyle: config.get('notificationStyle', DEFAULTS.notificationStyle),
     titleTemplate: config.get('titleTemplate', DEFAULTS.titleTemplate),
     messageTemplate: config.get('messageTemplate', DEFAULTS.messageTemplate),
     includeBranch: config.get('includeBranch', DEFAULTS.includeBranch),

@@ -119,6 +119,19 @@
           "default": "Glass",
           "markdownDescription": "macOS notification sound name. Leave empty for no sound. Examples: `Glass`, `Ping`, `Submarine`."
         },
+        "claudeCodeSupernotifier.notificationStyle": {
+          "type": "string",
+          "enum": [
+            "system",
+            "banner"
+          ],
+          "default": "system",
+          "markdownEnumDescriptions": [
+            "Respect your macOS notification preference (System Settings → Notifications → Claude Code SuperNotifier → **Banners** or **Alerts**) and also keep the notification in Notification Center until dismissed.",
+            "Always show as a transient banner that auto-dismisses. No Notification Center entry."
+          ],
+          "markdownDescription": "Controls how notifications are presented. To make notifications **stay until clicked**, leave this as `system` and set the style to **Alerts** in macOS System Settings → Notifications → Claude Code SuperNotifier."
+        },
         "claudeCodeSupernotifier.titleTemplate": {
           "type": "string",
           "default": "${repo}",

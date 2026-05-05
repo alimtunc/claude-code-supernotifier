@@ -100,4 +100,29 @@ describe('notifyMacOS', () => {
     const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
     expect(args).not.toContain('--click-touch');
   });
+
+  it('omits --style when notificationStyle is system (default)', () => {
+    Object.defineProperty(process, 'platform', { value: 'darwin' });
+
+    notifyMacOS(baseEvent, {
+      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
+      notificationStyle: 'system'
+    });
+
+    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
+    expect(args).not.toContain('--style');
+  });
+
+  it('passes --style banner when notificationStyle is banner', () => {
+    Object.defineProperty(process, 'platform', { value: 'darwin' });
+
+    notifyMacOS(baseEvent, {
+      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
+      notificationStyle: 'banner'
+    });
+
+    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
+    expect(args).toContain('--style');
+    expect(args).toContain('banner');
+  });
 });
