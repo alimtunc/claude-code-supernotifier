@@ -2,7 +2,7 @@
   "name": "claude-code-supernotifier",
   "displayName": "Claude Code SuperNotifier",
   "description": "Native macOS notifications for Claude Code sessions: multi-window aware, click-to-focus, repo-aware templates.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "alimtunc",
   "license": "MIT",
   "icon": "media/icon.png",
