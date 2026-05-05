@@ -68,9 +68,14 @@ This requires `swiftc`, `sips`, `iconutil`, `lipo`, and `codesign` (Xcode comman
 
 ## Releasing
 
-1. Bump `version` in `package.json` and add an entry to `CHANGELOG.md`.
-2. Open a PR; merge after CI is green.
-3. Tag `vX.Y.Z` on the merge commit and push the tag — the **Release** workflow runs the full quality gate, builds the VSIX, publishes to the Marketplace (if `VSCE_PAT` is configured) and attaches the VSIX to the GitHub release.
+```sh
+pnpm release            # auto-detect bump from conventional commits
+pnpm release minor      # force a specific bump
+pnpm release --dry-run  # preview the plan, no writes
+pnpm release --no-push  # commit + tag locally, push later
+```
+
+`pnpm release` runs the full verification pipeline (lint, format, typecheck, tests, production bundle), bumps `package.json`, updates `CHANGELOG.md`, commits, tags `vX.Y.Z`, and pushes both the branch and tag. The pushed tag triggers the **Release** workflow, which rebuilds the VSIX, publishes to the Marketplace (if `VSCE_PAT` is configured), and attaches the VSIX to the GitHub release.
 
 The marketplace `publisher` is `alimtunc`. Publishing requires a Personal Access Token stored as `VSCE_PAT` in the repo secrets.
 

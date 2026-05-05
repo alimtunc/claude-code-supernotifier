@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # Release helper. Auto-detects bump kind from conventional commits since the
 # last v*.*.* tag, runs the full verification pipeline, bumps package.json and
-# CHANGELOG, then commits and tags. Optionally pushes to trigger the release
-# workflow.
+# CHANGELOG, commits, tags, and pushes to trigger the release workflow.
 #
 # Usage:
-#   pnpm release [patch|minor|major] [--dry-run] [--yes] [--push]
+#   pnpm release [patch|minor|major] [--dry-run] [--yes] [--no-push]
 #
 # The actual GitHub release + Marketplace publish is delegated to
 # .github/workflows/release.yml, triggered by the pushed tag.
@@ -26,14 +25,14 @@ GRAY="240"
 # ─── Args ───
 DRY_RUN=false
 YES=false
-PUSH=false
+PUSH=true
 FORCED_KIND=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=true ;;
     --yes | -y) YES=true ;;
-    --push) PUSH=true ;;
+    --no-push) PUSH=false ;;
     patch | minor | major)
       [[ -n "$FORCED_KIND" ]] && { echo "Bump kind given twice."; exit 1; }
       FORCED_KIND="$1" ;;
@@ -265,11 +264,6 @@ apply_release() {
 # ─── push_release ───
 push_release() {
   echo ""
-  if [[ "$YES" != "true" ]] && ! styled_confirm --affirmative "Push" --negative "Skip" "Push origin ${BRANCH} and ${NEXT_TAG} now?"; then
-    muted "Skipped. Run later: git push origin ${BRANCH} ${NEXT_TAG}"
-    return
-  fi
-
   gum spin --spinner dot --title "Pushing ${BRANCH}..." --show-error -- git push origin "${BRANCH}"
   success "Pushed ${BRANCH}"
   gum spin --spinner dot --title "Pushing ${NEXT_TAG}..." --show-error -- git push origin "${NEXT_TAG}"
@@ -309,7 +303,13 @@ main() {
   fi
 
   if [[ "$YES" != "true" ]]; then
-    if ! styled_confirm --affirmative "Bump" --negative "Cancel" "Bump ${CURRENT_VERSION} → ${NEXT_VERSION} and tag ${NEXT_TAG}?"; then
+    local prompt
+    if [[ "$PUSH" == "true" ]]; then
+      prompt="Bump ${CURRENT_VERSION} → ${NEXT_VERSION}, tag ${NEXT_TAG}, and push?"
+    else
+      prompt="Bump ${CURRENT_VERSION} → ${NEXT_VERSION} and tag ${NEXT_TAG}?"
+    fi
+    if ! styled_confirm --affirmative "Release" --negative "Cancel" "$prompt"; then
       muted "Aborted."
       exit 0
     fi
