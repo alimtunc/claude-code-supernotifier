@@ -20,5 +20,9 @@ export const DEFAULTS = {
   includeBranch: true,
   focusOnClick: true,
   claudeOpenSessionCommand: 'claude-vscode.editor.open',
-  claudeFocusCommand: 'claude-vscode.focus'
+  claudeFocusCommand: 'claude-vscode.focus',
+  stopLabel: 'Finished',
+  permissionLabel: 'Permission required',
+  idlePromptLabel: 'Claude is waiting for input',
+  attentionLabel: 'Claude needs you'
 } as const;

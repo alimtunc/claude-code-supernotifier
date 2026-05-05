@@ -13,7 +13,7 @@ const baseEvent: NormalisedEvent = {
   repo: 'repo',
   branch: 'main',
   event: 'Stop',
-  eventLabel: 'Réponse terminée',
+  eventLabel: 'Finished',
   notificationType: '',
   notificationMessage: '',
   sessionId: 'sess-1',
@@ -22,7 +22,7 @@ const baseEvent: NormalisedEvent = {
   clickedPath: '/tmp/state/clicked',
   signalPath: '/tmp/state/signal.json',
   title: 'Claude: repo',
-  message: 'Réponse terminée · main',
+  message: 'Finished · main',
   createdAt: '2026-05-04T00:00:00.000Z',
   raw: {}
 };
@@ -78,7 +78,7 @@ describe('notifyMacOS', () => {
     expect(args).toContain('--title');
     expect(args).toContain('Claude: repo');
     expect(args).toContain('--message');
-    expect(args).toContain('Réponse terminée · main');
+    expect(args).toContain('Finished · main');
     expect(args).toContain('--sound');
     expect(args).toContain('Glass');
     expect(args).toContain('--group');

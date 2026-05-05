@@ -161,6 +161,26 @@
           "type": "string",
           "default": "claude-vscode.focus",
           "markdownDescription": "VS Code command executed after opening a Claude Code session to bring it into focus."
+        },
+        "claudeCodeSupernotifier.stopLabel": {
+          "type": "string",
+          "default": "Finished",
+          "markdownDescription": "Label used as `${eventLabel}` when Claude Code finishes a turn."
+        },
+        "claudeCodeSupernotifier.permissionLabel": {
+          "type": "string",
+          "default": "Permission required",
+          "markdownDescription": "Label used as `${eventLabel}` for permission prompts."
+        },
+        "claudeCodeSupernotifier.idlePromptLabel": {
+          "type": "string",
+          "default": "Claude is waiting for input",
+          "markdownDescription": "Label used as `${eventLabel}` for idle prompts."
+        },
+        "claudeCodeSupernotifier.attentionLabel": {
+          "type": "string",
+          "default": "Claude needs you",
+          "markdownDescription": "Fallback label used as `${eventLabel}` for other Notification events when no message is provided."
         }
       }
     }

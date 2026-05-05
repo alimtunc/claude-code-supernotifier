@@ -11,6 +11,10 @@ export interface SupernotifierConfig {
   notifierBinaryPath: string;
   claudeOpenSessionCommand: string;
   claudeFocusCommand: string;
+  stopLabel: string;
+  permissionLabel: string;
+  idlePromptLabel: string;
+  attentionLabel: string;
 }
 
 export interface ClaudeHookCommand {

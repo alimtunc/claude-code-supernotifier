@@ -19,6 +19,10 @@ export function getRuntimeConfig(): SupernotifierConfig {
     focusOnClick: config.get('focusOnClick', DEFAULTS.focusOnClick),
     notifierBinaryPath: notifierBinaryPath(),
     claudeOpenSessionCommand: config.get('claudeOpenSessionCommand', DEFAULTS.claudeOpenSessionCommand),
-    claudeFocusCommand: config.get('claudeFocusCommand', DEFAULTS.claudeFocusCommand)
+    claudeFocusCommand: config.get('claudeFocusCommand', DEFAULTS.claudeFocusCommand),
+    stopLabel: config.get('stopLabel', DEFAULTS.stopLabel),
+    permissionLabel: config.get('permissionLabel', DEFAULTS.permissionLabel),
+    idlePromptLabel: config.get('idlePromptLabel', DEFAULTS.idlePromptLabel),
+    attentionLabel: config.get('attentionLabel', DEFAULTS.attentionLabel)
   };
 }

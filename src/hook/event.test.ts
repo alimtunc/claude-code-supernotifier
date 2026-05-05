@@ -23,7 +23,7 @@ describe('normaliseEvent', () => {
   it('renders title and message from templates', () => {
     const ev = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/myrepo' }, baseConfig);
     expect(ev.title).toBe('Claude: myrepo');
-    expect(ev.message).toMatch(/^Réponse terminée/);
+    expect(ev.message).toMatch(/^Finished/);
     expect(ev.event).toBe('Stop');
     expect(ev.repo).toBe('myrepo');
   });
@@ -42,7 +42,7 @@ describe('normaliseEvent', () => {
       { hook_event_name: 'Notification', notification_type: 'permission_prompt', cwd: '/tmp/r' },
       baseConfig
     );
-    expect(ev.eventLabel).toBe('Permission requise');
+    expect(ev.eventLabel).toBe('Permission required');
   });
 
   it('falls back to the notification message when type is unknown', () => {
@@ -51,6 +51,22 @@ describe('normaliseEvent', () => {
       baseConfig
     );
     expect(ev.eventLabel).toBe('Custom thing');
+  });
+
+  it('uses configured label overrides', () => {
+    const ev = normaliseEvent(
+      { hook_event_name: 'Stop', cwd: '/tmp/r' },
+      { ...baseConfig, stopLabel: 'Réponse terminée' }
+    );
+    expect(ev.eventLabel).toBe('Réponse terminée');
+  });
+
+  it('uses configured attention fallback when notification message is empty', () => {
+    const ev = normaliseEvent(
+      { hook_event_name: 'Notification', cwd: '/tmp/r' },
+      { ...baseConfig, attentionLabel: 'Heads up' }
+    );
+    expect(ev.eventLabel).toBe('Heads up');
   });
 });
 

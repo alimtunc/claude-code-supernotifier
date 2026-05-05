@@ -46,3 +46,6 @@ yarn.lock
 **/*.test.js
 **/__tests__/**
 dist/e2e-install.cjs
+
+# README assets — the marketplace resolves relative paths to GitHub via repository.url, no need to bundle
+media/demo.gif

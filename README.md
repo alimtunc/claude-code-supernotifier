@@ -4,6 +4,8 @@ Native macOS notifications for [Claude Code](https://docs.claude.com/en/docs/cla
 
 When Claude finishes a turn or asks for permission, you get a real macOS banner with optional sound and repository-aware text. Click it and the matching VS Code window comes forward.
 
+![SuperNotifier demo](https://raw.githubusercontent.com/alimtunc/claude-code-supernotifier/main/media/demo.gif)
+
 > macOS only for now. Linux/Windows are on the roadmap.
 
 ## Why this one
@@ -66,19 +68,23 @@ Nothing leaves your machine.
 
 All settings live under `claudeCodeSupernotifier.*`.
 
-| Setting                    | Default                        | Purpose                                                |
-| -------------------------- | ------------------------------ | ------------------------------------------------------ |
-| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                    |
-| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                     |
-| `sound`                    | `Glass`                        | macOS sound name. Empty disables sound.                |
-| `titleTemplate`            | `${repo}`                      | Notification title template.                           |
-| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                            |
-| `includeBranch`            | `true`                         | Append the current Git branch to messages.             |
-| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.     |
-| `customRepoNames`          | `{}`                           | Map folder name → display name.                        |
-| `focusOnClick`             | `true`                         | Open the matching session on click.                    |
-| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.          |
-| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward. |
+| Setting                    | Default                        | Purpose                                                 |
+| -------------------------- | ------------------------------ | ------------------------------------------------------- |
+| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                     |
+| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                      |
+| `sound`                    | `Glass`                        | macOS sound name. Empty disables sound.                 |
+| `titleTemplate`            | `${repo}`                      | Notification title template.                            |
+| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                             |
+| `includeBranch`            | `true`                         | Append the current Git branch to messages.              |
+| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.      |
+| `customRepoNames`          | `{}`                           | Map folder name → display name.                         |
+| `focusOnClick`             | `true`                         | Open the matching session on click.                     |
+| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.           |
+| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.  |
+| `stopLabel`                | `Finished`                     | `${eventLabel}` text when Claude finishes a turn.       |
+| `permissionLabel`          | `Permission required`          | `${eventLabel}` text for permission prompts.            |
+| `idlePromptLabel`          | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                  |
+| `attentionLabel`           | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events. |
 
 ### Template variables
 
@@ -88,7 +94,7 @@ ${branch}               # current Git branch ("" outside a repo)
 ${branchSuffix}         # " · ${branch}" when includeBranch is true, else ""
 ${cwd}                  # working directory of the Claude Code session
 ${event}                # raw hook event name ("Stop", "Notification", ...)
-${eventLabel}           # localised label ("Réponse terminée", "Permission requise", ...)
+${eventLabel}           # configurable label ("Finished", "Permission required", ...) — see *Label settings*
 ${notificationType}     # "permission_prompt" | "idle_prompt" | ""
 ${notificationMessage}  # raw message Claude provided
 ${lastAssistantMessage} # last assistant message, truncated to 180 chars

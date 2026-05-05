@@ -19,7 +19,7 @@ export function normaliseEvent(input: HookInputEvent, config: HookConfig): Norma
   const notificationType = input.notification_type ?? input.type ?? '';
   const notificationMessage = input.message ?? input.notification_message ?? '';
   const lastAssistantMessage = truncate(input.last_assistant_message ?? '', ASSISTANT_MESSAGE_MAX_LENGTH);
-  const eventLabel = getEventLabel(event, notificationType, notificationMessage);
+  const eventLabel = getEventLabel(event, notificationType, notificationMessage, config);
   const branchSuffix = config.includeBranch && branch ? ` · ${branch}` : '';
   const sessionId = input.session_id ?? '';
   const transcriptPath = input.transcript_path ?? '';
@@ -79,18 +79,23 @@ export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolea
   return false;
 }
 
-function getEventLabel(event: string, notificationType: string, notificationMessage: string): string {
+function getEventLabel(
+  event: string,
+  notificationType: string,
+  notificationMessage: string,
+  config: HookConfig
+): string {
   if (event === 'Stop') {
-    return 'Réponse terminée';
+    return config.stopLabel ?? DEFAULTS.stopLabel;
   }
   if (event === 'Notification') {
     if (notificationType === 'permission_prompt') {
-      return 'Permission requise';
+      return config.permissionLabel ?? DEFAULTS.permissionLabel;
     }
     if (notificationType === 'idle_prompt') {
-      return 'Claude attend ton input';
+      return config.idlePromptLabel ?? DEFAULTS.idlePromptLabel;
     }
-    return notificationMessage || 'Claude a besoin de toi';
+    return notificationMessage || (config.attentionLabel ?? DEFAULTS.attentionLabel);
   }
   return event;
 }
