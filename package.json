@@ -65,7 +65,7 @@
     "vscode:prepublish": "pnpm run package"
   },
   "devDependencies": {
-    "@types/node": "^20.17.24",
+    "@types/node": "^25.6.2",
     "@types/vscode": "1.90.0",
     "@typescript/native-preview": "^7.0.0-dev.20260504.1",
     "@vscode/vsce": "^3.2.1",
