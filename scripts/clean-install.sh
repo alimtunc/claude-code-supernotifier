@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Clean install: build VSIX, quit VSCode, wipe extension dir + runtime state, reinstall, force-copy dist.
-# Required because `code --install-extension --force` silently leaves stale dist files when the version
-# is unchanged, and a running VSCode keeps the previous extension host in memory.
+# Clean install: build VSIX, wipe extension dir + runtime state, reinstall, force-copy dist.
+# `code --install-extension --force` silently leaves stale dist files when the version is unchanged,
+# hence the explicit force-copy at the end. The user must reload the VSCode window after this script
+# finishes so the extension host picks up the new code (we don't quit VSCode to avoid disrupting other windows).
 
 set -euo pipefail
 
@@ -18,13 +19,6 @@ echo "==> Building VSIX (${NAME}-${VERSION}.vsix)"
 cd "${REPO_ROOT}"
 rm -f "${REPO_ROOT}"/*.vsix
 pnpm run vsce:package
-
-echo "==> Quitting VSCode"
-osascript -e 'quit app "Visual Studio Code"' 2>/dev/null || true
-for _ in 1 2 3 4 5; do
-  pgrep -f 'Visual Studio Code.app/Contents/MacOS/Electron' >/dev/null || break
-  sleep 1
-done
 
 echo "==> Killing stale notifier processes"
 pkill -f ClaudeCodeSupernotifier 2>/dev/null || true
@@ -52,7 +46,7 @@ cat <<EOF
 ✅ Clean install done.
 
 Next steps:
-  1. Open VSCode (cold launch from Spotlight or Finder)
+  1. In VSCode: Cmd+Shift+P → "Developer: Reload Window" (drops the old extension host)
   2. Allow notifications for "Claude Code SuperNotifier" if macOS prompts
   3. Cmd+Shift+P → "Claude Code SuperNotifier: Test macOS Notification"
   4. Cmd+Shift+P → "Claude Code SuperNotifier: Install Claude Hooks" (rewrites ~/.claude/settings.json)
