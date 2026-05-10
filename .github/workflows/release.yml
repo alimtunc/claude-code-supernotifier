@@ -42,7 +42,7 @@ jobs:
         run: pnpm exec vsce publish --no-dependencies --packagePath claude-code-supernotifier.vsix
 
       - name: Attach VSIX to GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: claude-code-supernotifier.vsix
           generate_release_notes: true
