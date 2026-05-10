@@ -4,6 +4,14 @@ All notable changes to **Claude Code SuperNotifier** are documented in this file
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-05-10
+
+### Fixed
+
+- register helper bundle with LaunchServices
+- drop path arg from `open -a` to stop spawning a new window
+- exclude .claude/ and AGENTS.md from package
+
 ## [0.5.0] - 2026-05-05
 
 ### Added
