@@ -9,6 +9,9 @@ export const NOTIFIER_BUNDLE_ID = 'com.alimtunc.claude-code-supernotifier';
 
 const STAMP_FILE = '.notifier-app.stamp';
 const PRIME_TIMEOUT_MS = 4000;
+const LSREGISTER =
+  '/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister';
+const LSREGISTER_TIMEOUT_MS = 2000;
 
 export function installedNotifierAppPath(): string {
   return path.join(appDir, NOTIFIER_APP_NAME);
@@ -35,6 +38,7 @@ export function ensureNotifierApp(context: vscode.ExtensionContext): void {
   const upToDate =
     fs.existsSync(target) && sourceStamp !== undefined && readStampFile(stampPath) === sourceStamp;
 
+  let staged = false;
   if (!upToDate) {
     try {
       fs.mkdirSync(appDir, { recursive: true });
@@ -44,10 +48,45 @@ export function ensureNotifierApp(context: vscode.ExtensionContext): void {
       if (sourceStamp) {
         fs.writeFileSync(stampPath, sourceStamp, 'utf8');
       }
-      primeAuthorization(target);
+      staged = true;
     } catch (error) {
       console.error('[claude-code-supernotifier] failed to install notifier app', error);
     }
+  }
+
+  // UNUserNotificationCenter requires the calling bundle to be registered with
+  // LaunchServices; cpSync alone doesn't register it, so notifications get
+  // silently dropped and the app never appears in System Settings → Notifications.
+  // Idempotent — runs every activate so existing installs from before this fix
+  // also get registered.
+  const registered = fs.existsSync(target) && registerWithLaunchServices(target);
+
+  if (staged && registered) {
+    primeAuthorization(target);
+  }
+}
+
+function registerWithLaunchServices(appPath: string): boolean {
+  try {
+    const result = cp.spawnSync(LSREGISTER, ['-f', appPath], {
+      encoding: 'utf8',
+      timeout: LSREGISTER_TIMEOUT_MS
+    });
+    if (result.error) {
+      console.error('[claude-code-supernotifier] failed to register notifier app', result.error);
+      return false;
+    }
+    if (result.status !== 0) {
+      console.error(
+        '[claude-code-supernotifier] lsregister failed',
+        result.stderr || `exit code ${result.status}`
+      );
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[claude-code-supernotifier] lsregister threw', error);
+    return false;
   }
 }
 
