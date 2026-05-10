@@ -1,6 +1,7 @@
 # Folders that never ship
 .git/**
 .github/**
+.claude/**
 .vscode/**
 .vscode-test/**
 .lefthook/**
@@ -24,6 +25,7 @@ resources/**
 .oxlintrc.json
 .prettierignore
 .prettierrc.json
+AGENTS.md
 CLAUDE.md
 CONTRIBUTING.md
 esbuild.js
