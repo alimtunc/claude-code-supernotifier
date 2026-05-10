@@ -25,3 +25,6 @@ coverage/
 
 # Lefthook local cache
 .lefthook-local.yml
+
+# Claude Code local state (worktrees, etc.)
+.claude/
