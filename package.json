@@ -1,7 +1,7 @@
 {
   "name": "claude-code-supernotifier",
   "displayName": "Claude Code SuperNotifier",
-  "description": "Native macOS notifications for Claude Code sessions: multi-window aware, click-to-focus, repo-aware templates.",
+  "description": "Native desktop notifications for Claude Code sessions: multi-window aware, click-to-focus (macOS), repo-aware templates. Works on macOS, Linux (notify-send) and Windows 10+.",
   "version": "0.6.0",
   "publisher": "alimtunc",
   "license": "MIT",
@@ -21,6 +21,8 @@
     "anthropic",
     "notifications",
     "macos",
+    "linux",
+    "windows",
     "hooks",
     "productivity"
   ],
@@ -94,7 +96,7 @@
       {
         "command": "claudeCodeSupernotifier.testNotification",
         "category": "Claude Code SuperNotifier",
-        "title": "Test macOS Notification"
+        "title": "Test Notification"
       },
       {
         "command": "claudeCodeSupernotifier.openSettings",
@@ -108,17 +110,22 @@
         "claudeCodeSupernotifier.notifyOnStop": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Show a macOS notification when Claude Code finishes responding."
+          "markdownDescription": "Show a desktop notification when Claude Code finishes responding."
         },
         "claudeCodeSupernotifier.notifyOnAttention": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Show a macOS notification when Claude Code needs attention (permission prompts, idle prompts)."
+          "markdownDescription": "Show a desktop notification when Claude Code needs attention (permission prompts, idle prompts)."
         },
         "claudeCodeSupernotifier.sound": {
           "type": "string",
           "default": "Glass",
-          "markdownDescription": "macOS notification sound name. Leave empty for no sound. Examples: `Glass`, `Ping`, `Submarine`."
+          "markdownDescription": "macOS notification sound name. Leave empty for no sound. Examples: `Glass`, `Ping`, `Submarine`. On Windows the default toast sound is used (`Notification.Default`) and empty disables it. On Linux the value is ignored (`notify-send` has no portable sound)."
+        },
+        "claudeCodeSupernotifier.notifyCommand": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Optional override for the desktop-notifier binary. Leave empty to auto-detect (`notify-send` on Linux, `powershell` on Windows, bundled helper on macOS). On Linux you can point this at `dunstify` or another `notify-send`-compatible binary."
         },
         "claudeCodeSupernotifier.notificationStyle": {
           "type": "string",
@@ -164,7 +171,7 @@
         "claudeCodeSupernotifier.focusOnClick": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Open the matching Claude Code session when clicking the macOS notification."
+          "markdownDescription": "Open the matching Claude Code session when clicking the notification. macOS only — Linux and Windows notifications are fire-and-forget for now."
         },
         "claudeCodeSupernotifier.claudeOpenSessionCommand": {
           "type": "string",

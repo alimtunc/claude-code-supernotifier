@@ -11,7 +11,8 @@ import {
   getSignalPath,
   getStateDir,
   hashWorkspace,
-  helperPath
+  helperPath,
+  iconPath
 } from './paths';
 
 describe('paths', () => {
@@ -30,7 +31,7 @@ describe('paths', () => {
   });
 
   it('helper, config and log paths sit inside appDir', () => {
-    for (const child of [helperPath, configPath, eventLogPath, errorLogPath, focusStateRoot]) {
+    for (const child of [helperPath, configPath, iconPath, eventLogPath, errorLogPath, focusStateRoot]) {
       expect(child.startsWith(appDir + path.sep)).toBe(true);
     }
   });

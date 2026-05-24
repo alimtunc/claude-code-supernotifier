@@ -19,6 +19,7 @@ export function getRuntimeConfig(): SupernotifierConfig {
     customRepoNames: config.get('customRepoNames', {}),
     focusOnClick: config.get('focusOnClick', DEFAULTS.focusOnClick),
     notifierBinaryPath: notifierBinaryPath(),
+    notifyCommand: config.get('notifyCommand', DEFAULTS.notifyCommand),
     claudeOpenSessionCommand: config.get('claudeOpenSessionCommand', DEFAULTS.claudeOpenSessionCommand),
     claudeFocusCommand: config.get('claudeFocusCommand', DEFAULTS.claudeFocusCommand),
     stopLabel: config.get('stopLabel', DEFAULTS.stopLabel),

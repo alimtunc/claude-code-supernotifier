@@ -1,42 +1,25 @@
-import * as cp from 'node:child_process';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { notifyMacOS } from './notifier';
+import { notify } from './notifier';
+import * as linux from './notifierLinux';
+import * as mac from './notifierMac';
+import * as win from './notifierWin';
 import type { HookConfig, NormalisedEvent } from './types';
 
-vi.mock('node:child_process', async (importOriginal) => {
-  const actual = await importOriginal<typeof cp>();
-  return { ...actual, spawn: vi.fn() };
-});
+vi.mock('./notifierMac', () => ({ notify: vi.fn() }));
+vi.mock('./notifierLinux', () => ({ notify: vi.fn() }));
+vi.mock('./notifierWin', () => ({ notify: vi.fn() }));
 
-const baseEvent: NormalisedEvent = {
-  cwd: '/tmp/repo',
-  repo: 'repo',
-  branch: 'main',
-  event: 'Stop',
-  eventLabel: 'Finished',
-  notificationType: '',
-  notificationMessage: '',
-  sessionId: 'sess-1',
-  transcriptPath: '/tmp/repo/.transcript',
-  workspaceRoot: '/tmp/repo',
-  clickedPath: '/tmp/state/clicked',
-  signalPath: '/tmp/state/signal.json',
-  title: 'Claude: repo',
-  message: 'Finished · main',
-  createdAt: '2026-05-04T00:00:00.000Z',
-  raw: {}
-};
+const event = { title: 't', message: 'm' } as unknown as NormalisedEvent;
+const config: HookConfig = {};
 
-const fakeChild = { on: () => fakeChild, unref: () => {} } as unknown as cp.ChildProcess;
-
-describe('notifyMacOS', () => {
+describe('notifier dispatcher', () => {
   let originalPlatform: PropertyDescriptor | undefined;
-  const spawnMock = vi.mocked(cp.spawn);
 
   beforeEach(() => {
     originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
-    spawnMock.mockReset();
-    spawnMock.mockReturnValue(fakeChild);
+    vi.mocked(mac.notify).mockReset();
+    vi.mocked(linux.notify).mockReset();
+    vi.mocked(win.notify).mockReset();
   });
 
   afterEach(() => {
@@ -45,84 +28,35 @@ describe('notifyMacOS', () => {
     }
   });
 
-  it('skips on non-darwin platforms', () => {
+  it('routes darwin to notifierMac', () => {
+    Object.defineProperty(process, 'platform', { value: 'darwin' });
+    notify(event, config);
+    expect(mac.notify).toHaveBeenCalledWith(event, config);
+    expect(linux.notify).not.toHaveBeenCalled();
+    expect(win.notify).not.toHaveBeenCalled();
+  });
+
+  it('routes linux to notifierLinux', () => {
     Object.defineProperty(process, 'platform', { value: 'linux' });
-
-    notifyMacOS(baseEvent, { notifierBinaryPath: '/tmp/bin' });
-
-    expect(spawnMock).not.toHaveBeenCalled();
+    notify(event, config);
+    expect(linux.notify).toHaveBeenCalledWith(event, config);
+    expect(mac.notify).not.toHaveBeenCalled();
+    expect(win.notify).not.toHaveBeenCalled();
   });
 
-  it('does nothing when notifierBinaryPath is missing', () => {
-    Object.defineProperty(process, 'platform', { value: 'darwin' });
-
-    notifyMacOS(baseEvent, {});
-
-    expect(spawnMock).not.toHaveBeenCalled();
+  it('routes win32 to notifierWin', () => {
+    Object.defineProperty(process, 'platform', { value: 'win32' });
+    notify(event, config);
+    expect(win.notify).toHaveBeenCalledWith(event, config);
+    expect(mac.notify).not.toHaveBeenCalled();
+    expect(linux.notify).not.toHaveBeenCalled();
   });
 
-  it('spawns the swift binary with the expected CLI args', () => {
-    Object.defineProperty(process, 'platform', { value: 'darwin' });
-
-    const config: HookConfig = {
-      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
-      sound: 'Glass',
-      focusOnClick: true
-    };
-
-    notifyMacOS(baseEvent, config);
-
-    expect(spawnMock).toHaveBeenCalledTimes(1);
-    const [cmd, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
-    expect(cmd).toBe('/tmp/bundle/ClaudeCodeSupernotifier');
-    expect(args).toContain('--title');
-    expect(args).toContain('Claude: repo');
-    expect(args).toContain('--message');
-    expect(args).toContain('Finished · main');
-    expect(args).toContain('--sound');
-    expect(args).toContain('Glass');
-    expect(args).toContain('--group');
-    expect(args).toContain('sess-1');
-    expect(args).toContain('--signal-path');
-    expect(args).toContain('/tmp/state/signal.json');
-    expect(args).toContain('--click-touch');
-    expect(args).toContain('/tmp/state/clicked');
-  });
-
-  it('omits click-touch when focusOnClick is false', () => {
-    Object.defineProperty(process, 'platform', { value: 'darwin' });
-
-    notifyMacOS(baseEvent, {
-      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
-      focusOnClick: false
-    });
-
-    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
-    expect(args).not.toContain('--click-touch');
-  });
-
-  it('omits --style when notificationStyle is system (default)', () => {
-    Object.defineProperty(process, 'platform', { value: 'darwin' });
-
-    notifyMacOS(baseEvent, {
-      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
-      notificationStyle: 'system'
-    });
-
-    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
-    expect(args).not.toContain('--style');
-  });
-
-  it('passes --style banner when notificationStyle is banner', () => {
-    Object.defineProperty(process, 'platform', { value: 'darwin' });
-
-    notifyMacOS(baseEvent, {
-      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
-      notificationStyle: 'banner'
-    });
-
-    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
-    expect(args).toContain('--style');
-    expect(args).toContain('banner');
+  it('is a no-op on other platforms', () => {
+    Object.defineProperty(process, 'platform', { value: 'freebsd' });
+    notify(event, config);
+    expect(mac.notify).not.toHaveBeenCalled();
+    expect(linux.notify).not.toHaveBeenCalled();
+    expect(win.notify).not.toHaveBeenCalled();
   });
 });

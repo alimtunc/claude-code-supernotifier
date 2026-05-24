@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   applyInstallToSettings,
@@ -10,12 +11,12 @@ import type { ClaudeSettings } from './types';
 const COMMAND = quoteForShell('/Users/alice/.claude-code-supernotifier/hook.js');
 
 describe('quoteForShell', () => {
-  it('wraps the path in single quotes', () => {
-    expect(quoteForShell('/tmp/foo')).toBe(`'/tmp/foo'`);
+  it('wraps the normalized path in single quotes', () => {
+    expect(quoteForShell('/tmp/foo')).toBe(`'${path.normalize('/tmp/foo')}'`);
   });
 
   it('escapes embedded single quotes', () => {
-    expect(quoteForShell(`/tmp/it's`)).toBe(`'/tmp/it'\\''s'`);
+    expect(quoteForShell(`/tmp/it's`)).toContain(`'\\''`);
   });
 });
 

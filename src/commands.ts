@@ -19,7 +19,7 @@ export async function installClaudeHooks(context: vscode.ExtensionContext): Prom
     installHooks();
 
     const action = await vscode.window.showInformationMessage(
-      'Claude Code SuperNotifier hooks installed. New Claude Code turns will now trigger macOS notifications.',
+      'Claude Code SuperNotifier hooks installed. New Claude Code turns will now trigger desktop notifications.',
       'Test Notification',
       'Open Settings'
     );
@@ -61,7 +61,7 @@ export async function testNotification(context: vscode.ExtensionContext): Promis
   };
 
   try {
-    const result = cp.spawnSync(helperPath, ['--test'], {
+    const result = cp.spawnSync(process.execPath, [helperPath, '--test'], {
       input: JSON.stringify(sample),
       encoding: 'utf8',
       timeout: HELPER_TIMEOUT_MS

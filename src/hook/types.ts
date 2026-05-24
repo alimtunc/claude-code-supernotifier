@@ -24,6 +24,7 @@ export interface HookConfig {
   customRepoNames?: Record<string, string>;
   focusOnClick?: boolean;
   notifierBinaryPath?: string;
+  notifyCommand?: string;
   stopLabel?: string;
   permissionLabel?: string;
   idlePromptLabel?: string;

@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { tryReadJson } from '../shared/json';
 import { appDir, configPath, errorLogPath, eventLogPath } from '../shared/paths';
 import { normaliseEvent, shouldNotify } from './event';
-import { notifyMacOS } from './notifier';
+import { notify } from './notifier';
 import type { HookConfig, HookInputEvent, NormalisedEvent } from './types';
 
 main().catch((error: unknown) => {
@@ -21,7 +21,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  notifyMacOS(normalised, config);
+  notify(normalised, config);
 }
 
 function readStdinJson(): Promise<HookInputEvent> {

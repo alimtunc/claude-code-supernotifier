@@ -4,6 +4,20 @@ All notable changes to **Claude Code SuperNotifier** are documented in this file
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Linux notifications via `notify-send` (libnotify) and Windows 10+ notifications via the WinRT toast API (`Windows.UI.Notifications.ToastNotificationManager`). Click-to-focus remains macOS-only for now.
+- `claudeCodeSupernotifier.notifyCommand` setting to override the auto-detected notifier binary (e.g. `dunstify` on Linux, `pwsh` on Windows).
+- Staged `icon.png` in `~/.claude-code-supernotifier/` so Linux/Windows notifications can render the SuperNotifier mascot.
+
+### Changed
+
+- Hook notifier is now a thin platform dispatcher (`notifierMac.ts` / `notifierLinux.ts` / `notifierWin.ts`); the macOS Swift-binary path is unchanged.
+- Test command renamed from "Test macOS Notification" to "Test Notification".
+- `Test Notification` command now invokes the hook via `node` so it works on Windows too.
+
 ## [0.6.0] - 2026-05-24
 
 ### Added

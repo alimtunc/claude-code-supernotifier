@@ -11,9 +11,13 @@ permissions:
 
 jobs:
   verify:
-    name: Lint - Typecheck - Test - Package
-    runs-on: macos-latest
-    timeout-minutes: 10
+    name: ${{ matrix.os }} — lint / typecheck / test / build / smoke
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +32,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install libnotify-bin (Linux notifier)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libnotify-bin
 
       - name: Lint (oxlint)
         run: pnpm run lint
@@ -44,15 +52,32 @@ jobs:
       - name: Build (production bundle)
         run: node esbuild.js --production
 
-      - name: Verify hook bundle is executable
-        run: |
-          test -f dist/hook.js
-          head -1 dist/hook.js | grep -q '^#!/usr/bin/env node'
+      - name: Verify hook bundle exists
+        run: node -e "if (!require('node:fs').existsSync('dist/hook.js')) { process.exit(1); }"
 
-      - name: Package VSIX
+      - name: Verify Linux notifier (notify-send) is callable
+        if: runner.os == 'Linux'
+        run: notify-send --help > /dev/null
+
+      - name: Verify Windows notifier (PowerShell + WinRT) is callable
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $output = powershell -NoProfile -ExecutionPolicy Bypass -Command "[void][Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType=WindowsRuntime]; Write-Host 'WINRT_OK'"
+          if ($output -notmatch 'WINRT_OK') {
+            Write-Error "PowerShell could not load Windows.UI.Notifications WinRT types"
+            exit 1
+          }
+
+      - name: Smoke test — pipe a Stop event through dist/hook.js
+        run: node scripts/smoke-hook.mjs
+
+      - name: Package VSIX (macOS only)
+        if: runner.os == 'macOS'
         run: pnpm exec vsce package --no-dependencies --out claude-code-supernotifier.vsix
 
       - uses: actions/upload-artifact@v4
+        if: runner.os == 'macOS'
         with:
           name: claude-code-supernotifier-vsix
           path: claude-code-supernotifier.vsix

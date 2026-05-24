@@ -1,12 +1,16 @@
 export const APP_DIR_NAME = '.claude-code-supernotifier';
 export const HELPER_SCRIPT_NAME = 'hook.js';
 export const CONFIG_FILE_NAME = 'config.json';
+export const ICON_FILE_NAME = 'icon.png';
 export const EVENT_LOG_NAME = 'events.jsonl';
 export const ERROR_LOG_NAME = 'errors.log';
 export const FOCUS_STATE_DIR_NAME = 'focus-state';
 export const SIGNAL_FILE_NAME = 'signal.json';
 export const CLICKED_FILE_NAME = 'clicked';
 export const FOCUSED_FILE_NAME = 'focused';
+
+export const NOTIFIER_DISPLAY_NAME = 'Claude Code SuperNotifier';
+export const NOTIFIER_TOAST_APP_ID = 'ClaudeCodeSupernotifier';
 
 export const CLAUDE_SETTINGS_DIRNAME = '.claude';
 export const CLAUDE_SETTINGS_FILENAME = 'settings.json';
@@ -26,5 +30,6 @@ export const DEFAULTS = {
   permissionLabel: 'Permission required',
   idlePromptLabel: 'Claude is waiting for input',
   attentionLabel: 'Claude needs you',
-  statusBarEnabled: true
+  statusBarEnabled: true,
+  notifyCommand: ''
 } as const;

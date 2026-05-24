@@ -10,6 +10,7 @@ export interface SupernotifierConfig {
   customRepoNames: Record<string, string>;
   focusOnClick: boolean;
   notifierBinaryPath: string;
+  notifyCommand: string;
   claudeOpenSessionCommand: string;
   claudeFocusCommand: string;
   stopLabel: string;
