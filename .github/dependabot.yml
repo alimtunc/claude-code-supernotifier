@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 1
+    ignore:
+      # Keep aligned with engines.vscode floor — a newer type bump would
+      # let us silently use APIs unavailable on the minimum supported VSCode.
+      - dependency-name: '@types/vscode'
     groups:
       npm-all:
         patterns:
