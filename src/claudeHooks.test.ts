@@ -20,12 +20,13 @@ describe('quoteForShell', () => {
 });
 
 describe('applyInstallToSettings', () => {
-  it('creates Stop, Notification and PermissionRequest hooks on an empty settings file', () => {
+  it('creates Stop, Notification, PermissionRequest and UserPromptSubmit hooks on an empty settings file', () => {
     const next = applyInstallToSettings({}, COMMAND);
     expect(next.hooks).toBeDefined();
     expect(next.hooks?.Stop?.[0]?.hooks?.[0]).toEqual({ type: 'command', command: COMMAND });
     expect(next.hooks?.Notification?.[0]?.matcher).toBe('permission_prompt|idle_prompt');
     expect(next.hooks?.PermissionRequest?.[0]?.hooks?.[0]?.command).toBe(COMMAND);
+    expect(next.hooks?.UserPromptSubmit?.[0]?.hooks?.[0]?.command).toBe(COMMAND);
   });
 
   it('is idempotent across repeated installs', () => {

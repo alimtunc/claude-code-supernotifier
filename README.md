@@ -13,6 +13,7 @@ When Claude finishes a turn or asks for permission, you get a real macOS banner 
 There are already plenty of "Claude notifier" extensions. SuperNotifier focuses on the multi-window workflow:
 
 - **Multi-session aware** — each banner is grouped per session id and routes back to the right window when clicked.
+- **Live status bar** — a Claude indicator in the VS Code status bar tells you at a glance whether the session is working, waiting on you, or idle. Click it to jump back into the session.
 - **Click-to-focus** — opens the right workspace and triggers the Claude Code editor command on banner click.
 - **Quiet when you're already there** — notifications are suppressed automatically when the matching VS Code window has focus.
 - **Repo-aware** — title and message templates know about the repo and current Git branch.
@@ -25,6 +26,8 @@ There are already plenty of "Claude notifier" extensions. SuperNotifier focuses 
 3. Run `Claude Code SuperNotifier: Test macOS Notification`. The first time, macOS asks to allow notifications under "Claude Code SuperNotifier" — accept once.
 
 The bundled helper (`ClaudeCodeSupernotifier.app`) ships with the VSIX. No `brew install` step.
+
+> Upgrading from 0.5.x? Re-run `Install Claude Hooks` once so the status bar can see when Claude starts working — the `working` state relies on the new `UserPromptSubmit` hook.
 
 ## Commands
 
@@ -86,6 +89,7 @@ All settings live under `claudeCodeSupernotifier.*`.
 | `permissionLabel`          | `Permission required`          | `${eventLabel}` text for permission prompts.                                                                                        |
 | `idlePromptLabel`          | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                                                                                              |
 | `attentionLabel`           | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events.                                                                             |
+| `statusBar.enabled`        | `true`                         | Show the live Claude status bar item (`working` / `waiting` / `idle`). Reload the window after toggling.                            |
 
 ### Template variables
 

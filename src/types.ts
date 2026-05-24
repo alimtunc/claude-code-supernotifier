@@ -16,6 +16,7 @@ export interface SupernotifierConfig {
   permissionLabel: string;
   idlePromptLabel: string;
   attentionLabel: string;
+  statusBarEnabled: boolean;
 }
 
 export interface ClaudeHookCommand {
@@ -33,6 +34,7 @@ export interface ClaudeSettings {
     Stop?: ClaudeHookGroup[];
     Notification?: ClaudeHookGroup[];
     PermissionRequest?: ClaudeHookGroup[];
+    UserPromptSubmit?: ClaudeHookGroup[];
     [eventName: string]: ClaudeHookGroup[] | undefined;
   };
   [key: string]: unknown;

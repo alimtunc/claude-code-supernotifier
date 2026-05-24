@@ -25,5 +25,6 @@ export const DEFAULTS = {
   stopLabel: 'Finished',
   permissionLabel: 'Permission required',
   idlePromptLabel: 'Claude is waiting for input',
-  attentionLabel: 'Claude needs you'
+  attentionLabel: 'Claude needs you',
+  statusBarEnabled: true
 } as const;

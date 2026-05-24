@@ -4,6 +4,13 @@ All notable changes to **Claude Code SuperNotifier** are documented in this file
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- live Claude Code status bar item with `working` / `waiting` / `idle` states, click to focus the matching session (`claudeCodeSupernotifier.statusBar.enabled`, default on)
+- managed hook for `UserPromptSubmit` so the status bar can show the `working` state — existing users should re-run `Install Claude Hooks`
+
 ## [0.5.2] - 2026-05-24
 
 ### Fixed

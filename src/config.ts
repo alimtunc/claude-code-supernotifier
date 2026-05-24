@@ -24,6 +24,7 @@ export function getRuntimeConfig(): SupernotifierConfig {
     stopLabel: config.get('stopLabel', DEFAULTS.stopLabel),
     permissionLabel: config.get('permissionLabel', DEFAULTS.permissionLabel),
     idlePromptLabel: config.get('idlePromptLabel', DEFAULTS.idlePromptLabel),
-    attentionLabel: config.get('attentionLabel', DEFAULTS.attentionLabel)
+    attentionLabel: config.get('attentionLabel', DEFAULTS.attentionLabel),
+    statusBarEnabled: config.get('statusBar.enabled', DEFAULTS.statusBarEnabled)
   };
 }

@@ -5,6 +5,7 @@ import { COMMAND_IDS, CONFIG_SECTION } from './constants';
 import { startFocusStateTracker } from './focusState';
 import { ensureNotifierApp } from './notifierApp';
 import { writeRuntimeFiles } from './runtimeFiles';
+import { startStatusBarTracker } from './statusBar';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -25,6 +26,7 @@ export function activate(context: vscode.ExtensionContext): void {
   writeRuntimeFiles(context);
   startClickSignalWatcher(context);
   startFocusStateTracker(context);
+  startStatusBarTracker(context);
 }
 
 export function deactivate(): void {}

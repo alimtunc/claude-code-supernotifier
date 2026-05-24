@@ -4,7 +4,7 @@ import { claudeSettingsPath, helperPath } from './shared/paths';
 import type { ClaudeHookCommand, ClaudeHookGroup, ClaudeSettings } from './types';
 
 const CLAUDE_HOOK_EVENTS = ['Stop', 'Notification', 'PermissionRequest', 'UserPromptSubmit'] as const;
-const MANAGED_EVENTS = ['Stop', 'Notification', 'PermissionRequest'] as const;
+const MANAGED_EVENTS = ['Stop', 'Notification', 'PermissionRequest', 'UserPromptSubmit'] as const;
 const NOTIFICATION_MATCHER = 'permission_prompt|idle_prompt';
 
 const KNOWN_THIRD_PARTY_HOOK_FRAGMENTS = [
@@ -44,6 +44,7 @@ export function applyInstallToSettings(settings: ClaudeSettings, command: string
   ensureHook(next, 'Stop', undefined, command);
   ensureHook(next, 'Notification', NOTIFICATION_MATCHER, command);
   ensureHook(next, 'PermissionRequest', undefined, command);
+  ensureHook(next, 'UserPromptSubmit', undefined, command);
 
   return next;
 }
