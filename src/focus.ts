@@ -1,4 +1,5 @@
 import * as cp from 'node:child_process';
+import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { CONFIG_SECTION } from './constants';
 import { DEFAULTS } from './shared/constants';
@@ -10,20 +11,26 @@ export interface FocusRequest {
 
 const OPEN_LAST_COMMAND = 'claude-vscode.editor.openLast';
 
-// VSCode commands focus things *inside* the window but don't activate the app
-// at OS level. The notification click activated the notifier .app, not VSCode,
-// so when our window is in the background we ask macOS to bring VSCode forward.
-// We deliberately omit any path argument: `open -a Code.app <path>` falls back
-// to spawning a NEW window when VSCode's internal path comparison disagrees
-// (symlinks, case, native-tabs dispatcher), which is issue #2.
-function bringHostAppToFront(): void {
+// With macOS native tabs, several VSCode windows live as tabs inside one AppKit
+// window — `open -a Code.app` only activates the app and `vscode.commands.*`
+// focus things *inside* the current window, so neither switches tabs. The bundled
+// `code --reuse-window <path>` CLI asks the running instance to surface the
+// window already holding that workspace, and AppKit switches the native tab as
+// a side effect of `makeKeyAndOrderFront:`. When we don't know the workspace,
+// fall back to plain app activation.
+function bringHostWindowToFront(cwd: string | undefined): void {
   if (process.platform !== 'darwin') return;
   if (vscode.window.state.focused) return;
   const idx = process.execPath.indexOf('.app/');
   if (idx === -1) return;
   const appPath = process.execPath.slice(0, idx + '.app'.length);
   try {
-    cp.spawn('/usr/bin/open', ['-a', appPath], { detached: true, stdio: 'ignore' }).unref();
+    if (cwd) {
+      const cliPath = path.join(appPath, 'Contents', 'Resources', 'app', 'bin', 'code');
+      cp.spawn(cliPath, ['--reuse-window', cwd], { detached: true, stdio: 'ignore' }).unref();
+    } else {
+      cp.spawn('/usr/bin/open', ['-a', appPath], { detached: true, stdio: 'ignore' }).unref();
+    }
   } catch {
     // best-effort; VSCode commands below may still focus the panel.
   }
@@ -34,7 +41,7 @@ export async function focusClaudeSession(request: FocusRequest): Promise<void> {
   const openSessionCommand = config.get('claudeOpenSessionCommand', DEFAULTS.claudeOpenSessionCommand);
   const focusCommand = config.get('claudeFocusCommand', DEFAULTS.claudeFocusCommand);
 
-  bringHostAppToFront();
+  bringHostWindowToFront(request.cwd);
 
   try {
     if (request.sessionId) {
