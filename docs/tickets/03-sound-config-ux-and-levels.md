@@ -9,11 +9,11 @@
 
 ## Scope
 
-Ticket 02 gives every event its own sound *string*, but two usability gaps remain.
+Ticket 02 gives every event its own sound _string_, but two usability gaps remain.
 First, the per-event sound settings (`stopSound`, `permissionSound`,
 `questionSound`, `subagentStopSound`) are opaque free-text fields — a user has no
 way to hear `Glass` vs `Funk` without saving settings and triggering a real
-Claude turn. Second, our gating is still binary: an event either banners *with*
+Claude turn. Second, our gating is still binary: an event either banners _with_
 sound or does nothing at all, driven by the `notifyOnStop` / `notifyOnAttention`
 booleans in [shouldNotify](../../src/hook/event.ts#L65) and the single
 `config.sound` read in the notifiers. There is no "banner but stay silent" or
@@ -221,17 +221,17 @@ later cleanup ticket.
 
 5. **Mute interaction.** The level matrix composes with — and is subordinate to —
    the global mute from ticket 04 (file-based mute toggle): mute suppresses
-   *everything* regardless of level; level only differentiates the unmuted case.
+   _everything_ regardless of level; level only differentiates the unmuted case.
    Document this ordering: global mute → `allowedRepos` filter → focus
    suppression → (threshold suppression, ticket 03) → per-event level. Document
    the full matrix in `README.md`:
 
-   | Level | Banner | Sound |
-   |-------|:------:|:-----:|
-   | `sound+popup` | yes | yes |
-   | `sound` | no | yes |
-   | `popup` | yes | no |
-   | `off` | no | no |
+   | Level         | Banner | Sound |
+   | ------------- | :----: | :---: |
+   | `sound+popup` |  yes   |  yes  |
+   | `sound`       |   no   |  yes  |
+   | `popup`       |  yes   |  no   |
+   | `off`         |   no   |  no   |
 
 ### Acceptance criteria
 

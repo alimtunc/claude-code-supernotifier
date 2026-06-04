@@ -64,8 +64,10 @@ export function pickHighestPriority(
 }
 
 function mapEventToState(entry: EventEntry): SessionState {
-  if (entry.event === 'Stop') return 'idle';
-  if (entry.event === 'Notification' || entry.event === 'PermissionRequest') return 'waiting';
+  if (entry.event === 'Stop' || entry.event === 'SubagentStop') return 'idle';
+  if (entry.event === 'Notification' || entry.event === 'PermissionRequest' || entry.event === 'PreToolUse') {
+    return 'waiting';
+  }
   if (entry.event === 'UserPromptSubmit') return 'running';
   return 'idle';
 }

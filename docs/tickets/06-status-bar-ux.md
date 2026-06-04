@@ -297,7 +297,7 @@ provenance only (not present in this workspace):
 
 - **File-based mute (Part 1):** a `MUTE_FLAG` file at
   `~/.claude/hooks/claude-notifier-muted`, toggled by `claudeNotifier.toggleSound`
-  in `src/ui/status-bar.ts`, and honoured by the hooks *before* they signal (see
+  in `src/ui/status-bar.ts`, and honoured by the hooks _before_ they signal (see
   `scripts/smoke.sh` and their README). Deliberately a file, not a setting, so it
   works without the extension host — which is exactly why our hook can read it.
 - **Reactive enable/disable (Part 2):** the reference refreshes its status bar

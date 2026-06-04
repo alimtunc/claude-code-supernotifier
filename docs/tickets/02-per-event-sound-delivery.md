@@ -43,14 +43,14 @@ Add optional per-event overrides that layer over the global `sound` (which stays
 
    It imports only the `HookConfig` type, so the boundary holds.
 
-3. **Use it in the notifiers.** Replace the direct `config.sound` read at [notifierMac.ts:25](../../src/hook/notifierMac.ts#L25) and the `config.sound === ''` test at [notifierWin.ts:34](../../src/hook/notifierWin.ts#L34) with the result of `resolveSound(event.event, config)`. Keep the existing semantics on the *resolved* value: macOS still passes the name to `--sound` (UNNotificationSound name lookup) and skips the flag when empty; Windows still treats empty as `<audio silent="true"/>`.
+3. **Use it in the notifiers.** Replace the direct `config.sound` read at [notifierMac.ts:25](../../src/hook/notifierMac.ts#L25) and the `config.sound === ''` test at [notifierWin.ts:34](../../src/hook/notifierWin.ts#L34) with the result of `resolveSound(event.event, config)`. Keep the existing semantics on the _resolved_ value: macOS still passes the name to `--sound` (UNNotificationSound name lookup) and skips the flag when empty; Windows still treats empty as `<audio silent="true"/>`.
 
 ### Acceptance criteria
 
 - [ ] `resolveSound` returns the per-event override when set and falls back to the global `sound` when the override is `''` (unit-tested in `src/shared/sound.test.ts`).
 - [ ] `PreToolUse` resolves to `questionSound` and `SubagentStop` to `subagentStopSound`; an unknown event resolves to `config.sound`.
 - [ ] macOS notifier passes the resolved per-event sound to `--sound` and still omits `--sound` when the resolved value is empty.
-- [ ] Windows toast honours empty-as-silent on the *resolved* value; existing [notifierMac.test.ts](../../src/hook/notifierMac.test.ts) `--sound`/`Glass` assertions (lines [62-63](../../src/hook/notifierMac.test.ts#L62-L63)) still pass with no overrides set.
+- [ ] Windows toast honours empty-as-silent on the _resolved_ value; existing [notifierMac.test.ts](../../src/hook/notifierMac.test.ts) `--sound`/`Glass` assertions (lines [62-63](../../src/hook/notifierMac.test.ts#L62-L63)) still pass with no overrides set.
 - [ ] All four new settings exist in `package.json` with `markdownDescription`, in `DEFAULTS`, in both config interfaces, and in `getRuntimeConfig` — kept in sync.
 - [ ] `src/shared/sound.ts` imports no `vscode`.
 

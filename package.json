@@ -115,7 +115,17 @@
         "claudeCodeSupernotifier.notifyOnAttention": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Show a desktop notification when Claude Code needs attention (permission prompts, idle prompts)."
+          "markdownDescription": "Show a desktop notification when Claude Code needs attention (permission prompts, idle prompts, questions)."
+        },
+        "claudeCodeSupernotifier.notifyOnSubagentStop": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Show a desktop notification when a Claude Code subagent (`Task`) finishes. Off by default to avoid noise during normal multi-step turns."
+        },
+        "claudeCodeSupernotifier.suppressSubagentInteractions": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Suppress permission and question prompts that originate inside a `Task` subagent (events carrying an `agent_id`). On by default so nested approvals don't ping; top-level prompts are unaffected."
         },
         "claudeCodeSupernotifier.sound": {
           "type": "string",
@@ -188,10 +198,20 @@
           "default": "Finished",
           "markdownDescription": "Label used as `${eventLabel}` when Claude Code finishes a turn."
         },
+        "claudeCodeSupernotifier.subagentStopLabel": {
+          "type": "string",
+          "default": "Subagent finished",
+          "markdownDescription": "Label used as `${eventLabel}` when a Claude Code subagent (`Task`) finishes. Requires `notifyOnSubagentStop`."
+        },
         "claudeCodeSupernotifier.permissionLabel": {
           "type": "string",
           "default": "Permission required",
           "markdownDescription": "Label used as `${eventLabel}` for permission prompts."
+        },
+        "claudeCodeSupernotifier.questionLabel": {
+          "type": "string",
+          "default": "Claude is asking a question",
+          "markdownDescription": "Label used as `${eventLabel}` when Claude asks a structured question (`AskUserQuestion`)."
         },
         "claudeCodeSupernotifier.idlePromptLabel": {
           "type": "string",

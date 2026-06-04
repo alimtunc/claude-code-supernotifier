@@ -30,6 +30,27 @@ describe('applyInstallToSettings', () => {
     expect(next.hooks?.UserPromptSubmit?.[0]?.hooks?.[0]?.command).toBe(COMMAND);
   });
 
+  it('creates a PreToolUse (AskUserQuestion matcher) group and a SubagentStop group', () => {
+    const next = applyInstallToSettings({}, COMMAND);
+    expect(next.hooks?.PreToolUse?.[0]?.matcher).toBe('AskUserQuestion');
+    expect(next.hooks?.PreToolUse?.[0]?.hooks?.[0]?.command).toBe(COMMAND);
+    expect(next.hooks?.SubagentStop?.[0]?.matcher).toBeUndefined();
+    expect(next.hooks?.SubagentStop?.[0]?.hooks?.[0]?.command).toBe(COMMAND);
+  });
+
+  it('preserves existing PreToolUse groups with other matchers', () => {
+    const initial: ClaudeSettings = {
+      hooks: {
+        PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: 'my-bash-hook' }] }]
+      }
+    };
+    const next = applyInstallToSettings(initial, COMMAND);
+    const bash = next.hooks?.PreToolUse?.find((g) => g.matcher === 'Bash');
+    const question = next.hooks?.PreToolUse?.find((g) => g.matcher === 'AskUserQuestion');
+    expect(bash?.hooks?.some((h) => h.command === 'my-bash-hook')).toBe(true);
+    expect(question?.hooks?.[0]?.command).toBe(COMMAND);
+  });
+
   it('is idempotent across repeated installs', () => {
     const first = applyInstallToSettings({}, COMMAND);
     const second = applyInstallToSettings(first, COMMAND);
@@ -97,6 +118,20 @@ describe('applyUninstallFromSettings', () => {
     const installed = applyInstallToSettings({}, COMMAND);
     const next = applyUninstallFromSettings(installed, COMMAND);
     expect(next.hooks).toBeUndefined();
+  });
+
+  it('removes the PreToolUse and SubagentStop groups while preserving foreign PreToolUse matchers', () => {
+    const initial: ClaudeSettings = {
+      hooks: {
+        PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: 'my-bash-hook' }] }]
+      }
+    };
+    const installed = applyInstallToSettings(initial, COMMAND);
+    const next = applyUninstallFromSettings(installed, COMMAND);
+    expect(next.hooks?.SubagentStop).toBeUndefined();
+    expect(next.hooks?.PreToolUse?.find((g) => g.matcher === 'AskUserQuestion')).toBeUndefined();
+    const bash = next.hooks?.PreToolUse?.find((g) => g.matcher === 'Bash');
+    expect(bash?.hooks?.some((h) => h.command === 'my-bash-hook')).toBe(true);
   });
 });
 

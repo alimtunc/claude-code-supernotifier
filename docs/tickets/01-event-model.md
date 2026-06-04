@@ -25,7 +25,7 @@ All three land as **separate, individually-unit-testable branches** in `shouldNo
 
 We install a `PermissionRequest` hook at [claudeHooks.ts:46](../../src/claudeHooks.ts#L46) but [`shouldNotify`](../../src/hook/event.ts#L65-L80) returns `false` for everything except `Stop` ([event.ts:73-75](../../src/hook/event.ts#L73-L75)) and `Notification` ([event.ts:76-78](../../src/hook/event.ts#L76-L78)). So `PermissionRequest` only ever drives status-bar state via the event log — it **never banners**. And we have no handling for structured questions (`AskUserQuestion`) at all.
 
-A user waiting on a permission or question prompt in a background window gets no ping, unless Claude *also* happens to emit a `Notification(permission_prompt)` — which is inconsistent across Claude Code versions. The reference project treats "permission needed" and "question asked" as first-class, separately-handled events.
+A user waiting on a permission or question prompt in a background window gets no ping, unless Claude _also_ happens to emit a `Notification(permission_prompt)` — which is inconsistent across Claude Code versions. The reference project treats "permission needed" and "question asked" as first-class, separately-handled events.
 
 ### Proposal
 
@@ -39,7 +39,7 @@ Make both events produce a banner, gated by the existing `notifyOnAttention`.
 
    Add an explicit `tool_name?: string` field to [`HookInputEvent`](../../src/hook/types.ts#L1-L13) (the index signature at [types.ts:12](../../src/hook/types.ts#L12) already permits it, but make it first-class).
 
-3. **Avoid double-firing with permission.** Mirror the reference behaviour: a `PermissionRequest` whose `raw.tool_name === 'AskUserQuestion'` must `return false` (it is handled by the `PreToolUse` branch). Permission prompts may *also* surface via the existing `Notification(permission_prompt)` hook on some Claude Code versions — note this overlap; it will be coalesced once the backlog **stage dedup** ticket lands. Until then, focus-suppression ([event.ts:70-72](../../src/hook/event.ts#L70-L72)) limits the nuisance.
+3. **Avoid double-firing with permission.** Mirror the reference behaviour: a `PermissionRequest` whose `raw.tool_name === 'AskUserQuestion'` must `return false` (it is handled by the `PreToolUse` branch). Permission prompts may _also_ surface via the existing `Notification(permission_prompt)` hook on some Claude Code versions — note this overlap; it will be coalesced once the backlog **stage dedup** ticket lands. Until then, focus-suppression ([event.ts:70-72](../../src/hook/event.ts#L70-L72)) limits the nuisance.
 
 4. **Event labels.** In [`getEventLabel`](../../src/hook/event.ts#L82-L101) add a `PermissionRequest` branch → `config.permissionLabel ?? DEFAULTS.permissionLabel` (reuse the existing label at [constants.ts:30](../../src/shared/constants.ts#L30)), and a `PreToolUse`/`AskUserQuestion` branch → a new `questionLabel` (default `"Claude is asking a question"`). Wire `questionLabel` through [DEFAULTS](../../src/shared/constants.ts#L18-L35), [`SupernotifierConfig`](../../src/types.ts#L1-L21), [`HookConfig`](../../src/hook/types.ts#L15-L32), `package.json` `contributes.configuration.properties` (next to `permissionLabel` at [package.json:191-195](../../package.json#L191-L195)), and `getRuntimeConfig` in [config.ts:25-28](../../src/config.ts#L25-L28).
 
@@ -67,7 +67,7 @@ Long agentic runs spawn `Task` subagents. Some users want a ping when one finish
 
 Add `SubagentStop` as a registered hook plus a default-off toggle, following the [CLAUDE.md "Adding a setting" 6-step checklist](../../CLAUDE.md).
 
-1. **Register the hook.** In [src/claudeHooks.ts](../../src/claudeHooks.ts): add `'SubagentStop'` to `CLAUDE_HOOK_EVENTS` ([line 6](../../src/claudeHooks.ts#L6)) and `MANAGED_EVENTS` ([line 7](../../src/claudeHooks.ts#L7)), and add `ensureHook(next, 'SubagentStop', undefined, command);` in `applyInstallToSettings` ([claudeHooks.ts:44-47](../../src/claudeHooks.ts#L44-L47)). Add `SubagentStop?: ClaudeHookGroup[]` to [ClaudeSettings.hooks](../../src/types.ts#L33-L42). We register unconditionally; the *banner* is gated by the setting so the hook can stay installed while the user toggles the preference without re-running install.
+1. **Register the hook.** In [src/claudeHooks.ts](../../src/claudeHooks.ts): add `'SubagentStop'` to `CLAUDE_HOOK_EVENTS` ([line 6](../../src/claudeHooks.ts#L6)) and `MANAGED_EVENTS` ([line 7](../../src/claudeHooks.ts#L7)), and add `ensureHook(next, 'SubagentStop', undefined, command);` in `applyInstallToSettings` ([claudeHooks.ts:44-47](../../src/claudeHooks.ts#L44-L47)). Add `SubagentStop?: ClaudeHookGroup[]` to [ClaudeSettings.hooks](../../src/types.ts#L33-L42). We register unconditionally; the _banner_ is gated by the setting so the hook can stay installed while the user toggles the preference without re-running install.
 
 2. **Add the setting `claudeCodeSupernotifier.notifyOnSubagentStop` (default `false`).**
    - `package.json` `contributes.configuration.properties` — declare it next to `notifyOnAttention` ([package.json:115-119](../../package.json#L115-L119)) with `"type": "boolean"`, `"default": false`.
@@ -109,14 +109,14 @@ Add a default-on guard that drops `PermissionRequest` and `AskUserQuestion`-`Pre
    - [`HookConfig`](../../src/hook/types.ts#L15-L32) — add `suppressSubagentInteractions?: boolean;`.
    - [`getRuntimeConfig`](../../src/config.ts#L7-L31) — add `suppressSubagentInteractions: config.get('suppressSubagentInteractions', DEFAULTS.suppressSubagentInteractions),`.
 
-3. **Add the suppression branch** in [`shouldNotify`](../../src/hook/event.ts#L65), positioned **after** the allow-list and focus checks ([event.ts:66-72](../../src/hook/event.ts#L66-L72)) and **before** the per-event branches (Part 1/2 and existing Stop/Notification): when the event is a permission/question interaction *and* suppression is enabled *and* an `agent_id` is present, return `false`. Concretely:
+3. **Add the suppression branch** in [`shouldNotify`](../../src/hook/event.ts#L65), positioned **after** the allow-list and focus checks ([event.ts:66-72](../../src/hook/event.ts#L66-L72)) and **before** the per-event branches (Part 1/2 and existing Stop/Notification): when the event is a permission/question interaction _and_ suppression is enabled _and_ an `agent_id` is present, return `false`. Concretely:
    - `const isInteraction = event.event === 'PermissionRequest' || (event.event === 'PreToolUse' && event.raw.tool_name === 'AskUserQuestion');`
    - `const agentId = event.raw.agent_id;`
    - `if (isInteraction && config.suppressSubagentInteractions !== false && typeof agentId === 'string' && agentId.length > 0) return false;`
 
    Use `!== false` so the default (omitted) behaviour is **suppress**. The `typeof ... === 'string'` narrowing satisfies `noUncheckedIndexedAccess` without `any`/`as`.
 
-This branch must sit *before* the Part 1 permission/question branches so suppression wins; top-level interactions (no `agent_id`) fall through to the Part 1 branches unchanged.
+This branch must sit _before_ the Part 1 permission/question branches so suppression wins; top-level interactions (no `agent_id`) fall through to the Part 1 branches unchanged.
 
 ### Acceptance criteria
 

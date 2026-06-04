@@ -12,7 +12,7 @@
 Three independent noise sources share the same two seams — the per-event hook
 entry [`main()`](../../src/hook/index.ts#L13-L25) and the gate
 [`shouldNotify`](../../src/hook/event.ts#L65-L80) — so they are cheaper to land
-in one pass than three. All three reduce *redundant* banners without changing
+in one pass than three. All three reduce _redundant_ banners without changing
 which events are notifiable (that is ticket 01's job):
 
 - **Part 1** suppresses sub-second turns via a per-session task-start marker.
@@ -39,7 +39,7 @@ Order of gating inside `shouldNotify` after this epic:
 4. **Part 2** stage dedup
 5. per-event notify branches ([event.ts:73-79](../../src/hook/event.ts#L73-L79))
 
-cmux suppression (**Part 3**) deliberately lives one layer *out*, at the
+cmux suppression (**Part 3**) deliberately lives one layer _out_, at the
 [`notify(...)` call](../../src/hook/index.ts#L24) in `main()`, so the event log
 still records everything the status bar needs.
 
@@ -207,7 +207,7 @@ one**: a tiny JSON state file per session.
 - [ ] `grep -rn "from 'vscode'" src/shared src/hook` returns nothing.
 
 > **Adaptation note.** The reference keeps a `Map<sessionId, { stageId, fired:
-> Set, idleTimer }>` alive in the extension host and resets a stage on a 30-min
+Set, idleTimer }>` alive in the extension host and resets a stage on a 30-min
 > idle timer. We have no long-lived process at the hook layer, so we persist the
 > equivalent record to disk per session and rely on the shared 24h marker sweep
 > instead of an in-process idle timer. The `firedReasons: string[]` array is the
@@ -222,7 +222,7 @@ Our hook also fires, so the user gets **two** notifications for one event.
 
 ### Proposal
 
-Detect cmux and suppress only the *output* (the banner), keeping the event log
+Detect cmux and suppress only the _output_ (the banner), keeping the event log
 intact so the status bar stays consistent.
 
 1. **Pure detector — `src/shared/env.ts` (no `vscode`).**

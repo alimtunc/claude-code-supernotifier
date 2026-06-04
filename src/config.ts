@@ -10,6 +10,11 @@ export function getRuntimeConfig(): SupernotifierConfig {
   return {
     notifyOnStop: config.get('notifyOnStop', DEFAULTS.notifyOnStop),
     notifyOnAttention: config.get('notifyOnAttention', DEFAULTS.notifyOnAttention),
+    notifyOnSubagentStop: config.get('notifyOnSubagentStop', DEFAULTS.notifyOnSubagentStop),
+    suppressSubagentInteractions: config.get(
+      'suppressSubagentInteractions',
+      DEFAULTS.suppressSubagentInteractions
+    ),
     sound: config.get('sound', DEFAULTS.sound),
     notificationStyle: config.get('notificationStyle', DEFAULTS.notificationStyle),
     titleTemplate: config.get('titleTemplate', DEFAULTS.titleTemplate),
@@ -26,6 +31,8 @@ export function getRuntimeConfig(): SupernotifierConfig {
     permissionLabel: config.get('permissionLabel', DEFAULTS.permissionLabel),
     idlePromptLabel: config.get('idlePromptLabel', DEFAULTS.idlePromptLabel),
     attentionLabel: config.get('attentionLabel', DEFAULTS.attentionLabel),
+    questionLabel: config.get('questionLabel', DEFAULTS.questionLabel),
+    subagentStopLabel: config.get('subagentStopLabel', DEFAULTS.subagentStopLabel),
     statusBarEnabled: config.get('statusBar.enabled', DEFAULTS.statusBarEnabled)
   };
 }

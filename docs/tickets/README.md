@@ -21,14 +21,14 @@ keep the bundled Swift helper.
 
 ## Epics
 
-| # | Epic | Theme | Priority | Complexity | Depends on |
-|---|------|-------|----------|------------|-----------|
-| 01 | [Expand the event model: Permission, Question, SubagentStop, subagent suppression](01-event-model.md) | Events | high | L | — |
-| 02 | [Per-event sound delivery: resolver, Linux sound, bundled fallbacks](02-per-event-sound-delivery.md) | Sounds | high | L | 01-event-model.md (events must exist to sound-differentiate them) |
-| 03 | [Sound configuration UX: live-preview picker and per-event notification levels](03-sound-config-ux-and-levels.md) | Sounds | medium | L | 02-per-event-sound-delivery.md |
-| 04 | [Noise control: duration threshold, per-session stage dedup, cmux awareness](04-noise-control.md) | Thresholds | high | XL | 01-event-model.md |
-| 05 | [Precise multi-window routing: cwd ownership and ancestor-PID terminal reveal](05-multiwindow-routing.md) | Routing | medium | XL | — |
-| 06 | [Status-bar UX: file-based mute, reactive enable/disable, interactive control panel](06-status-bar-ux.md) | UI | high | L | 03-sound-config-ux-and-levels.md and 04-noise-control.md (for the panel preview/threshold links) |
+| #   | Epic                                                                                                              | Theme      | Priority | Complexity | Depends on                                                                                       |
+| --- | ----------------------------------------------------------------------------------------------------------------- | ---------- | -------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| 01  | [Expand the event model: Permission, Question, SubagentStop, subagent suppression](01-event-model.md)             | Events     | high     | L          | —                                                                                                |
+| 02  | [Per-event sound delivery: resolver, Linux sound, bundled fallbacks](02-per-event-sound-delivery.md)              | Sounds     | high     | L          | 01-event-model.md (events must exist to sound-differentiate them)                                |
+| 03  | [Sound configuration UX: live-preview picker and per-event notification levels](03-sound-config-ux-and-levels.md) | Sounds     | medium   | L          | 02-per-event-sound-delivery.md                                                                   |
+| 04  | [Noise control: duration threshold, per-session stage dedup, cmux awareness](04-noise-control.md)                 | Thresholds | high     | XL         | 01-event-model.md                                                                                |
+| 05  | [Precise multi-window routing: cwd ownership and ancestor-PID terminal reveal](05-multiwindow-routing.md)         | Routing    | medium   | XL         | —                                                                                                |
+| 06  | [Status-bar UX: file-based mute, reactive enable/disable, interactive control panel](06-status-bar-ux.md)         | UI         | high     | L          | 03-sound-config-ux-and-levels.md and 04-noise-control.md (for the panel preview/threshold links) |
 
 - **[Expand the event model: Permission, Question, SubagentStop, subagent suppression](01-event-model.md)** — Epic combining Permission/AskUserQuestion banners, opt-in SubagentStop notifications, and subagent-prompt suppression — all gated behind separately-testable shouldNotify branches.
 - **[Per-event sound delivery: resolver, Linux sound, bundled fallbacks](02-per-event-sound-delivery.md)** — Epic combining per-event sound overrides, Linux notification audio via paplay/freedesktop, and bundled fallback WAVs staged into the app dir.

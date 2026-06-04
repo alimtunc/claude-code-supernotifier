@@ -70,11 +70,37 @@ export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolea
   if (fs.existsSync(getFocusedPath(event.workspaceRoot))) {
     return false;
   }
+
+  const isInteraction =
+    event.event === 'PermissionRequest' ||
+    (event.event === 'PreToolUse' && event.raw.tool_name === 'AskUserQuestion');
+  const agentId = event.raw.agent_id;
+  if (
+    isInteraction &&
+    config.suppressSubagentInteractions !== false &&
+    typeof agentId === 'string' &&
+    agentId.length > 0
+  ) {
+    return false;
+  }
+
   if (event.event === 'Stop') {
     return config.notifyOnStop !== false;
   }
   if (event.event === 'Notification') {
     return config.notifyOnAttention !== false;
+  }
+  if (event.event === 'PermissionRequest') {
+    if (event.raw.tool_name === 'AskUserQuestion') {
+      return false;
+    }
+    return config.notifyOnAttention !== false;
+  }
+  if (event.event === 'PreToolUse' && event.raw.tool_name === 'AskUserQuestion') {
+    return config.notifyOnAttention !== false;
+  }
+  if (event.event === 'SubagentStop') {
+    return config.notifyOnSubagentStop === true;
   }
   return false;
 }
@@ -87,6 +113,15 @@ function getEventLabel(
 ): string {
   if (event === 'Stop') {
     return config.stopLabel ?? DEFAULTS.stopLabel;
+  }
+  if (event === 'SubagentStop') {
+    return config.subagentStopLabel ?? DEFAULTS.subagentStopLabel;
+  }
+  if (event === 'PermissionRequest') {
+    return config.permissionLabel ?? DEFAULTS.permissionLabel;
+  }
+  if (event === 'PreToolUse') {
+    return config.questionLabel ?? DEFAULTS.questionLabel;
   }
   if (event === 'Notification') {
     if (notificationType === 'permission_prompt') {

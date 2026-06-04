@@ -11,9 +11,9 @@
 
 Multi-window VSCode breaks two routing assumptions in this codebase.
 
-First, focus-suppression is decided per workspace root, not per *owning window*. Every live window mirrors its focus into a per-root flag file ([src/focusState.ts:26](../../src/focusState.ts#L26) `syncFocusFiles`), and the hook suppresses when the flag for the **event's normalised** `workspaceRoot` exists ([src/hook/event.ts:70](../../src/hook/event.ts#L70)). But the normalised root comes from `findWorkspaceRoot(cwd)` walking up for a `.vscode` dir ([src/hook/workspace.ts:5](../../src/hook/workspace.ts#L5)) — it does not know which open window actually *contains* that cwd. When a session's cwd sits inside one window's folder but normalises to a different path (nested `.vscode`, multi-root workspaces, monorepo subfolders), the wrong window's focus flag is consulted and there is no story for the case where **no** window owns the cwd at all.
+First, focus-suppression is decided per workspace root, not per _owning window_. Every live window mirrors its focus into a per-root flag file ([src/focusState.ts:26](../../src/focusState.ts#L26) `syncFocusFiles`), and the hook suppresses when the flag for the **event's normalised** `workspaceRoot` exists ([src/hook/event.ts:70](../../src/hook/event.ts#L70)). But the normalised root comes from `findWorkspaceRoot(cwd)` walking up for a `.vscode` dir ([src/hook/workspace.ts:5](../../src/hook/workspace.ts#L5)) — it does not know which open window actually _contains_ that cwd. When a session's cwd sits inside one window's folder but normalises to a different path (nested `.vscode`, multi-root workspaces, monorepo subfolders), the wrong window's focus flag is consulted and there is no story for the case where **no** window owns the cwd at all.
 
-Second, a click focuses the right *window* but never the right *terminal*. On macOS `focusClaudeSession` reuses the window via `code --reuse-window <cwd>` ([src/focus.ts:39](../../src/focus.ts#L39)), but the integrated terminal that actually launched Claude is left wherever it was.
+Second, a click focuses the right _window_ but never the right _terminal_. On macOS `focusClaudeSession` reuses the window via `code --reuse-window <cwd>` ([src/focus.ts:39](../../src/focus.ts#L39)), but the integrated terminal that actually launched Claude is left wherever it was.
 
 This epic introduces per-PID ownership markers and an ancestor-PID chain so exactly one window decides per session, and so the originating terminal is revealed on click. Both parts add new files but reuse the existing marker-file plumbing under `appDir` ([src/shared/paths.ts:19](../../src/shared/paths.ts#L19)) and the sanctioned child-process sites.
 
@@ -21,7 +21,7 @@ This epic introduces per-PID ownership markers and an ancestor-PID chain so exac
 
 ### Problem
 
-`shouldNotify` ([src/hook/event.ts:65](../../src/hook/event.ts#L65)) makes the suppression decision from `event.workspaceRoot`, which is the output of `findWorkspaceRoot(cwd)` ([src/hook/workspace.ts:5](../../src/hook/workspace.ts#L5)) — a pure walk-up heuristic with no knowledge of which windows are open. The focused check at [src/hook/event.ts:70-72](../../src/hook/event.ts#L70-L72) therefore reads the flag for a root that may belong to *no* open window, or to a *different* window than the one whose folder physically contains the cwd. Symptoms:
+`shouldNotify` ([src/hook/event.ts:65](../../src/hook/event.ts#L65)) makes the suppression decision from `event.workspaceRoot`, which is the output of `findWorkspaceRoot(cwd)` ([src/hook/workspace.ts:5](../../src/hook/workspace.ts#L5)) — a pure walk-up heuristic with no knowledge of which windows are open. The focused check at [src/hook/event.ts:70-72](../../src/hook/event.ts#L70-L72) therefore reads the flag for a root that may belong to _no_ open window, or to a _different_ window than the one whose folder physically contains the cwd. Symptoms:
 
 - Session cwd `/proj/packages/api` is open in window A (folder `/proj`), but `findWorkspaceRoot` stops at `/proj/packages/api` because it has its own `.vscode`. The hook checks the flag for `/proj/packages/api`, which no window writes, so it always notifies even when window A is focused.
 - Two windows write a `focused` flag for overlapping roots; there is no tie-breaker for "who owns this cwd".
@@ -36,7 +36,7 @@ Have each live extension window publish a per-PID **ownership marker** listing t
 2. **New PURE module `src/shared/ownership.ts`** (vscode-free; mirrors the `shared/` boundary):
    - `cwdInsideFolder(cwd: string, folder: string): boolean` — true when `cwd === folder` **or** `cwd.startsWith(folder + path.sep)`. The trailing-separator guard is the whole point: `/proj` must NOT match `/proj-other`. This is the same shape already used informally by `belongsToWorkspace` at [src/shared/sessionState.ts:77](../../src/shared/sessionState.ts#L77) — extract it here and have `belongsToWorkspace` call it (kills the third copy of the `startsWith(root + sep)` snippet).
    - `interface OwnershipMarker { pid: number; folders: string[] }`.
-   - `ownerOf(cwd: string, markers: readonly OwnershipMarker[]): OwnershipMarker | null` — returns the marker whose folder list contains the *longest* folder for which `cwdInsideFolder(cwd, folder)` holds (longest-prefix wins so a nested-folder window beats its parent). `null` when no marker owns the cwd.
+   - `ownerOf(cwd: string, markers: readonly OwnershipMarker[]): OwnershipMarker | null` — returns the marker whose folder list contains the _longest_ folder for which `cwdInsideFolder(cwd, folder)` holds (longest-prefix wins so a nested-folder window beats its parent). `null` when no marker owns the cwd.
    - `parseMarker(pid: number, content: string): OwnershipMarker` — split on `\n`, trim, drop empties. No `fs` here; reading is the caller's job.
 
 3. **New extension-side writer `src/ownershipMarker.ts`** (imports `vscode`; registration only, in `activate`):

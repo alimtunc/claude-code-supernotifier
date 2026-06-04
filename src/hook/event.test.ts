@@ -68,6 +68,39 @@ describe('normaliseEvent', () => {
     );
     expect(ev.eventLabel).toBe('Heads up');
   });
+
+  it('produces the permission label for PermissionRequest events', () => {
+    const ev = normaliseEvent({ hook_event_name: 'PermissionRequest', cwd: '/tmp/r' }, baseConfig);
+    expect(ev.eventLabel).toBe('Permission required');
+  });
+
+  it('produces the question label for PreToolUse/AskUserQuestion events', () => {
+    const ev = normaliseEvent(
+      { hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', cwd: '/tmp/r' },
+      baseConfig
+    );
+    expect(ev.eventLabel).toBe('Claude is asking a question');
+  });
+
+  it('produces the subagent-stop label for SubagentStop events', () => {
+    const ev = normaliseEvent({ hook_event_name: 'SubagentStop', cwd: '/tmp/r' }, baseConfig);
+    expect(ev.eventLabel).toBe('Subagent finished');
+  });
+
+  it('uses configured questionLabel/subagentStopLabel overrides', () => {
+    expect(
+      normaliseEvent(
+        { hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', cwd: '/tmp/r' },
+        { ...baseConfig, questionLabel: 'Question en attente' }
+      ).eventLabel
+    ).toBe('Question en attente');
+    expect(
+      normaliseEvent(
+        { hook_event_name: 'SubagentStop', cwd: '/tmp/r' },
+        { ...baseConfig, subagentStopLabel: 'Sous-agent terminé' }
+      ).eventLabel
+    ).toBe('Sous-agent terminé');
+  });
 });
 
 describe('shouldNotify', () => {
@@ -106,5 +139,139 @@ describe('shouldNotify', () => {
   it('notifies when no window is focused on the workspace', () => {
     existsSyncMock.mockReturnValue(false);
     expect(shouldNotify(stopEvent, baseConfig)).toBe(true);
+  });
+});
+
+describe('shouldNotify — permission & question (Part 1)', () => {
+  const permissionEvent = normaliseEvent(
+    { hook_event_name: 'PermissionRequest', cwd: '/tmp/repo' },
+    baseConfig
+  );
+  const questionEvent = normaliseEvent(
+    { hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', cwd: '/tmp/repo' },
+    baseConfig
+  );
+
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+  });
+
+  it('banners a PermissionRequest gated by notifyOnAttention', () => {
+    expect(shouldNotify(permissionEvent, { ...baseConfig, notifyOnAttention: true })).toBe(true);
+    expect(shouldNotify(permissionEvent, { ...baseConfig, notifyOnAttention: false })).toBe(false);
+  });
+
+  it('banners a PreToolUse/AskUserQuestion event gated by notifyOnAttention', () => {
+    expect(shouldNotify(questionEvent, { ...baseConfig, notifyOnAttention: true })).toBe(true);
+    expect(shouldNotify(questionEvent, { ...baseConfig, notifyOnAttention: false })).toBe(false);
+  });
+
+  it('does not banner a PreToolUse event for other tools', () => {
+    const other = normaliseEvent(
+      { hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd: '/tmp/repo' },
+      baseConfig
+    );
+    expect(shouldNotify(other, baseConfig)).toBe(false);
+  });
+
+  it('does not double-fire: a PermissionRequest whose tool is AskUserQuestion is dropped', () => {
+    const perm = normaliseEvent(
+      { hook_event_name: 'PermissionRequest', tool_name: 'AskUserQuestion', cwd: '/tmp/repo' },
+      baseConfig
+    );
+    expect(shouldNotify(perm, baseConfig)).toBe(false);
+  });
+
+  it('short-circuits permission/question events when the window is focused', () => {
+    existsSyncMock.mockReturnValue(true);
+    expect(shouldNotify(permissionEvent, baseConfig)).toBe(false);
+    expect(shouldNotify(questionEvent, baseConfig)).toBe(false);
+  });
+});
+
+describe('shouldNotify — SubagentStop (Part 2)', () => {
+  const subagentEvent = normaliseEvent({ hook_event_name: 'SubagentStop', cwd: '/tmp/repo' }, baseConfig);
+
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+  });
+
+  it('does not banner by default or when notifyOnSubagentStop is omitted', () => {
+    expect(shouldNotify(subagentEvent, baseConfig)).toBe(false);
+    expect(shouldNotify(subagentEvent, { ...baseConfig, notifyOnSubagentStop: undefined })).toBe(false);
+  });
+
+  it('banners only when notifyOnSubagentStop === true', () => {
+    expect(shouldNotify(subagentEvent, { ...baseConfig, notifyOnSubagentStop: true })).toBe(true);
+    expect(shouldNotify(subagentEvent, { ...baseConfig, notifyOnSubagentStop: false })).toBe(false);
+  });
+});
+
+describe('shouldNotify — subagent interaction suppression (Part 3)', () => {
+  const permFromSubagent = normaliseEvent(
+    { hook_event_name: 'PermissionRequest', cwd: '/tmp/repo', agent_id: 'agent-123' },
+    baseConfig
+  );
+  const questionFromSubagent = normaliseEvent(
+    { hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', cwd: '/tmp/repo', agent_id: 'agent-123' },
+    baseConfig
+  );
+
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+  });
+
+  it('drops a subagent PermissionRequest by default (suppress omitted or true)', () => {
+    expect(shouldNotify(permFromSubagent, baseConfig)).toBe(false);
+    expect(shouldNotify(permFromSubagent, { ...baseConfig, suppressSubagentInteractions: true })).toBe(false);
+  });
+
+  it('drops a subagent PreToolUse/AskUserQuestion by default', () => {
+    expect(shouldNotify(questionFromSubagent, baseConfig)).toBe(false);
+  });
+
+  it('falls through to the Part 1 banner when suppression is disabled', () => {
+    expect(
+      shouldNotify(permFromSubagent, {
+        ...baseConfig,
+        suppressSubagentInteractions: false,
+        notifyOnAttention: true
+      })
+    ).toBe(true);
+    expect(
+      shouldNotify(questionFromSubagent, {
+        ...baseConfig,
+        suppressSubagentInteractions: false,
+        notifyOnAttention: true
+      })
+    ).toBe(true);
+  });
+
+  it('leaves top-level interactions (no agent_id or empty) unaffected', () => {
+    const topPerm = normaliseEvent({ hook_event_name: 'PermissionRequest', cwd: '/tmp/repo' }, baseConfig);
+    const emptyAgent = normaliseEvent(
+      { hook_event_name: 'PermissionRequest', cwd: '/tmp/repo', agent_id: '' },
+      baseConfig
+    );
+    expect(shouldNotify(topPerm, baseConfig)).toBe(true);
+    expect(shouldNotify(emptyAgent, baseConfig)).toBe(true);
+  });
+
+  it('does not suppress Stop/Notification/SubagentStop even with an agent_id', () => {
+    const stop = normaliseEvent(
+      { hook_event_name: 'Stop', cwd: '/tmp/repo', agent_id: 'agent-1' },
+      baseConfig
+    );
+    const notif = normaliseEvent(
+      { hook_event_name: 'Notification', cwd: '/tmp/repo', agent_id: 'agent-1' },
+      baseConfig
+    );
+    const sub = normaliseEvent(
+      { hook_event_name: 'SubagentStop', cwd: '/tmp/repo', agent_id: 'agent-1' },
+      baseConfig
+    );
+    expect(shouldNotify(stop, baseConfig)).toBe(true);
+    expect(shouldNotify(notif, baseConfig)).toBe(true);
+    expect(shouldNotify(sub, { ...baseConfig, notifyOnSubagentStop: true })).toBe(true);
   });
 });

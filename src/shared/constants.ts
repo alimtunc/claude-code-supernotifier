@@ -18,6 +18,8 @@ export const CLAUDE_SETTINGS_FILENAME = 'settings.json';
 export const DEFAULTS = {
   notifyOnStop: true,
   notifyOnAttention: true,
+  notifyOnSubagentStop: false,
+  suppressSubagentInteractions: true,
   sound: 'Glass',
   notificationStyle: 'system',
   titleTemplate: '${repo}',
@@ -30,6 +32,8 @@ export const DEFAULTS = {
   permissionLabel: 'Permission required',
   idlePromptLabel: 'Claude is waiting for input',
   attentionLabel: 'Claude needs you',
+  questionLabel: 'Claude is asking a question',
+  subagentStopLabel: 'Subagent finished',
   statusBarEnabled: true,
   notifyCommand: ''
 } as const;

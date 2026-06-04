@@ -1,6 +1,8 @@
 export interface SupernotifierConfig {
   notifyOnStop: boolean;
   notifyOnAttention: boolean;
+  notifyOnSubagentStop: boolean;
+  suppressSubagentInteractions: boolean;
   sound: string;
   notificationStyle: 'system' | 'banner';
   titleTemplate: string;
@@ -17,6 +19,8 @@ export interface SupernotifierConfig {
   permissionLabel: string;
   idlePromptLabel: string;
   attentionLabel: string;
+  questionLabel: string;
+  subagentStopLabel: string;
   statusBarEnabled: boolean;
 }
 
@@ -35,6 +39,8 @@ export interface ClaudeSettings {
     Stop?: ClaudeHookGroup[];
     Notification?: ClaudeHookGroup[];
     PermissionRequest?: ClaudeHookGroup[];
+    PreToolUse?: ClaudeHookGroup[];
+    SubagentStop?: ClaudeHookGroup[];
     UserPromptSubmit?: ClaudeHookGroup[];
     [eventName: string]: ClaudeHookGroup[] | undefined;
   };

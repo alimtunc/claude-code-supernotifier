@@ -86,6 +86,26 @@ describe('deriveSessionState', () => {
     expect(snapshot.state).toBe('waiting');
   });
 
+  it('maps PreToolUse (AskUserQuestion) to waiting', () => {
+    const snapshot = deriveSessionState({
+      events: [makeEntry({ event: 'PreToolUse' })],
+      workspaceRoot: WORKSPACE,
+      now: new Date('2026-05-24T10:01:00Z'),
+      idleHideAfterMs: 600_000
+    });
+    expect(snapshot.state).toBe('waiting');
+  });
+
+  it('maps SubagentStop to idle', () => {
+    const snapshot = deriveSessionState({
+      events: [makeEntry({ event: 'SubagentStop' })],
+      workspaceRoot: WORKSPACE,
+      now: new Date('2026-05-24T10:01:00Z'),
+      idleHideAfterMs: 600_000
+    });
+    expect(snapshot.state).toBe('idle');
+  });
+
   it('uses the latest event, not the first', () => {
     const events = [
       makeEntry({ event: 'Stop', createdAt: '2026-05-24T09:00:00.000Z' }),

@@ -9,12 +9,16 @@ export interface HookInputEvent {
   session_id?: string;
   transcript_path?: string;
   permission_mode?: string;
+  tool_name?: string;
+  agent_id?: string;
   [key: string]: unknown;
 }
 
 export interface HookConfig {
   notifyOnStop?: boolean;
   notifyOnAttention?: boolean;
+  notifyOnSubagentStop?: boolean;
+  suppressSubagentInteractions?: boolean;
   sound?: string;
   notificationStyle?: 'system' | 'banner';
   titleTemplate?: string;
@@ -29,6 +33,8 @@ export interface HookConfig {
   permissionLabel?: string;
   idlePromptLabel?: string;
   attentionLabel?: string;
+  questionLabel?: string;
+  subagentStopLabel?: string;
 }
 
 export interface NormalisedEvent {

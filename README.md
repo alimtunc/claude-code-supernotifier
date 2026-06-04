@@ -79,26 +79,30 @@ Nothing leaves your machine.
 
 All settings live under `claudeCodeSupernotifier.*`.
 
-| Setting                    | Default                        | Purpose                                                                                                                            |
-| -------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `notifyOnStop`             | `true`                         | Notify when Claude finishes a turn.                                                                                                |
-| `notifyOnAttention`        | `true`                         | Notify on permission/idle prompts.                                                                                                 |
-| `sound`                    | `Glass`                        | macOS sound name. Windows uses its default toast sound when non-empty, silent when empty. Linux ignores this (no portable sound).  |
-| `notifyCommand`            | `""`                           | Optional override of the notifier binary. Auto-detected when empty (`notify-send` / `powershell` / bundled `.app`).                |
-| `notificationStyle`        | `system`                       | macOS only. `system` honors Banners/Alerts pref + keeps the notif in Notification Center. `banner` forces the legacy auto-dismiss. |
-| `titleTemplate`            | `${repo}`                      | Notification title template.                                                                                                       |
-| `messageTemplate`          | `${eventLabel}${branchSuffix}` | Notification body template.                                                                                                        |
-| `includeBranch`            | `true`                         | Append the current Git branch to messages.                                                                                         |
-| `allowedRepos`             | `[]`                           | Allow-list of folder names. Empty means all repos.                                                                                 |
-| `customRepoNames`          | `{}`                           | Map folder name → display name.                                                                                                    |
-| `focusOnClick`             | `true`                         | Open the matching session on click. macOS only — Linux/Windows banners are fire-and-forget for now.                                |
-| `claudeOpenSessionCommand` | `claude-vscode.editor.open`    | VS Code command used to open a session by id.                                                                                      |
-| `claudeFocusCommand`       | `claude-vscode.focus`          | Command run after opening to bring the editor forward.                                                                             |
-| `stopLabel`                | `Finished`                     | `${eventLabel}` text when Claude finishes a turn.                                                                                  |
-| `permissionLabel`          | `Permission required`          | `${eventLabel}` text for permission prompts.                                                                                       |
-| `idlePromptLabel`          | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                                                                                             |
-| `attentionLabel`           | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events.                                                                            |
-| `statusBar.enabled`        | `true`                         | Show the live Claude status bar item (`working` / `waiting` / `idle`). Reload the window after toggling.                           |
+| Setting                        | Default                        | Purpose                                                                                                                              |
+| ------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `notifyOnStop`                 | `true`                         | Notify when Claude finishes a turn.                                                                                                  |
+| `notifyOnAttention`            | `true`                         | Notify on permission/idle prompts and questions (`AskUserQuestion`).                                                                 |
+| `notifyOnSubagentStop`         | `false`                        | Notify when a `Task` subagent finishes. Off by default to avoid noise during multi-step turns.                                       |
+| `suppressSubagentInteractions` | `true`                         | Drop permission/question prompts that originate inside a subagent (events carrying an `agent_id`). Top-level prompts are unaffected. |
+| `sound`                        | `Glass`                        | macOS sound name. Windows uses its default toast sound when non-empty, silent when empty. Linux ignores this (no portable sound).    |
+| `notifyCommand`                | `""`                           | Optional override of the notifier binary. Auto-detected when empty (`notify-send` / `powershell` / bundled `.app`).                  |
+| `notificationStyle`            | `system`                       | macOS only. `system` honors Banners/Alerts pref + keeps the notif in Notification Center. `banner` forces the legacy auto-dismiss.   |
+| `titleTemplate`                | `${repo}`                      | Notification title template.                                                                                                         |
+| `messageTemplate`              | `${eventLabel}${branchSuffix}` | Notification body template.                                                                                                          |
+| `includeBranch`                | `true`                         | Append the current Git branch to messages.                                                                                           |
+| `allowedRepos`                 | `[]`                           | Allow-list of folder names. Empty means all repos.                                                                                   |
+| `customRepoNames`              | `{}`                           | Map folder name → display name.                                                                                                      |
+| `focusOnClick`                 | `true`                         | Open the matching session on click. macOS only — Linux/Windows banners are fire-and-forget for now.                                  |
+| `claudeOpenSessionCommand`     | `claude-vscode.editor.open`    | VS Code command used to open a session by id.                                                                                        |
+| `claudeFocusCommand`           | `claude-vscode.focus`          | Command run after opening to bring the editor forward.                                                                               |
+| `stopLabel`                    | `Finished`                     | `${eventLabel}` text when Claude finishes a turn.                                                                                    |
+| `subagentStopLabel`            | `Subagent finished`            | `${eventLabel}` text when a `Task` subagent finishes (needs `notifyOnSubagentStop`).                                                 |
+| `permissionLabel`              | `Permission required`          | `${eventLabel}` text for permission prompts.                                                                                         |
+| `questionLabel`                | `Claude is asking a question`  | `${eventLabel}` text for `AskUserQuestion` prompts.                                                                                  |
+| `idlePromptLabel`              | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                                                                                               |
+| `attentionLabel`               | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events.                                                                              |
+| `statusBar.enabled`            | `true`                         | Show the live Claude status bar item (`working` / `waiting` / `idle`). Reload the window after toggling.                             |
 
 ### Template variables
 
