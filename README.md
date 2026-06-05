@@ -40,13 +40,14 @@ The bundled helper (`ClaudeCodeSupernotifier.app`) ships with the VSIX for macOS
 
 ## Commands
 
-| Command                                             | Effect                                                                                        |
-| --------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `Claude Code SuperNotifier: Install Claude Hooks`   | Registers the helper in `~/.claude/settings.json`.                                            |
-| `Claude Code SuperNotifier: Uninstall Claude Hooks` | Removes the entries managed by this extension.                                                |
-| `Claude Code SuperNotifier: Test Notification`      | Sends a sample notification through the helper.                                               |
-| `Claude Code SuperNotifier: Open Settings`          | Opens the SuperNotifier settings section.                                                     |
-| `Claude Code SuperNotifier: Toggle Mute`            | Silences every notification until toggled off; the status bar shows a mute icon while active. |
+| Command                                             | Effect                                                                                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `Claude Code SuperNotifier: Install Claude Hooks`   | Registers the helper in `~/.claude/settings.json`.                                                                             |
+| `Claude Code SuperNotifier: Uninstall Claude Hooks` | Removes the entries managed by this extension.                                                                                 |
+| `Claude Code SuperNotifier: Test Notification`      | Sends a sample notification through the helper.                                                                                |
+| `Claude Code SuperNotifier: Open Settings`          | Opens the SuperNotifier settings section.                                                                                      |
+| `Claude Code SuperNotifier: Toggle Mute`            | Silences every notification until toggled off; the status bar shows a mute icon while active.                                  |
+| `Claude Code SuperNotifier: Pick Event Sound`       | Opens a sound picker that previews each platform sound live as you arrow through the list, then saves it for the chosen event. |
 
 ## How it works
 
@@ -96,6 +97,10 @@ All settings live under `claudeCodeSupernotifier.*`.
 | `permissionSound`              | `""`                           | Per-event sound for **permission** prompts. Empty means use `sound`.                                                                                                                                                                                   |
 | `questionSound`                | `""`                           | Per-event sound for **question** prompts (`AskUserQuestion`). Empty means use `sound`.                                                                                                                                                                 |
 | `subagentStopSound`            | `""`                           | Per-event sound for **subagent finished** (`SubagentStop`). Empty means use `sound`.                                                                                                                                                                   |
+| `stopLevel`                    | `sound+popup`                  | Notification level for **Stop** events (`sound+popup` / `sound` / `popup` / `off`). Supersedes `notifyOnStop`. See _Notification levels_ below.                                                                                                        |
+| `permissionLevel`              | `sound+popup`                  | Notification level for **permission** prompts. Supersedes `notifyOnAttention`.                                                                                                                                                                         |
+| `questionLevel`                | `sound+popup`                  | Notification level for **question** prompts (`AskUserQuestion`). Supersedes `notifyOnAttention`.                                                                                                                                                       |
+| `subagentStopLevel`            | `off`                          | Notification level for **subagent finished** events. Supersedes `notifyOnSubagentStop`.                                                                                                                                                                |
 | `notifyCommand`                | `""`                           | Optional override of the notifier binary. Auto-detected when empty (`notify-send` / `powershell` / bundled `.app`).                                                                                                                                    |
 | `notificationStyle`            | `system`                       | macOS only. `system` honors Banners/Alerts pref + keeps the notif in Notification Center. `banner` forces the legacy auto-dismiss.                                                                                                                     |
 | `titleTemplate`                | `${repo}`                      | Notification title template.                                                                                                                                                                                                                           |
@@ -126,11 +131,43 @@ Three mechanisms cut redundant banners without changing _which_ events are notif
 
 `sound` is the global fallback. Set any of `stopSound`, `permissionSound`, `questionSound`, or `subagentStopSound` to give an individual event its own sound so you can tell **by ear** what happened without looking. An empty per-event value (the default) means "use the global `sound`"; a non-empty value overrides it for that event only.
 
+Don't want to guess what `Submarine` sounds like? Run **`Claude Code SuperNotifier: Pick Event Sound`** — it lists the sounds available on your platform and **previews each one live** as you arrow through the list, then writes your choice to the matching per-event sound setting.
+
 Per platform, the resolved name is delivered as follows:
 
 - **macOS** — played as a `UNNotificationSound` by name (e.g. `Glass`, `Hero`, `Submarine`). An unknown name degrades to the default system sound.
 - **Windows** — the name itself isn't used; a non-empty value plays the default toast sound and an empty value is silent.
 - **Linux** — `notify-send` has no portable audio, so SuperNotifier plays the sound itself after the banner. The name is mapped to a [freedesktop](https://specifications.freedesktop.org/sound-theme-spec/latest/) theme file under `/usr/share/sounds/freedesktop/stereo/` (e.g. `Glass`/`Pop` → `message`, `Hero` → `complete`, `Funk` → `bell`) and played with `paplay`, falling back to `aplay` if PulseAudio/PipeWire isn't available. If that theme file is missing, a small **bundled WAV** (`done` / `needs-input` / `question`, staged into `~/.claude-code-supernotifier/sounds/` on activation) is played instead, so you always get audio. An empty resolved sound stays silent (banner only).
+
+### Notification levels
+
+Each notifiable event has a **level** that decides whether it shows a banner, plays a
+sound, both, or nothing. Set `stopLevel`, `permissionLevel`, `questionLevel`, or
+`subagentStopLevel`:
+
+| Level         | Banner | Sound |
+| ------------- | :----: | :---: |
+| `sound+popup` |  yes   |  yes  |
+| `sound`       |   no   |  yes  |
+| `popup`       |  yes   |  no   |
+| `off`         |   no   |  no   |
+
+The levels supersede the legacy `notifyOnStop` / `notifyOnAttention` /
+`notifyOnSubagentStop` booleans: when a level setting is left at its default the legacy
+boolean still applies, so existing configs keep working. On Linux the banner and sound
+share `notify-send`, so a `sound`-only level still shows the banner.
+
+Levels are the **last** gate to run. The full order is:
+
+1. **Global mute** (`Toggle Mute`) — suppresses everything regardless of level.
+2. **`allowedRepos`** allow-list filter.
+3. **Focused-window** suppression (the matching VS Code window is already in front).
+4. **Noise control** — duration threshold and per-prompt dedup.
+5. **Subagent-interaction** suppression.
+6. **Per-event level** — banner/sound/both/off as above.
+
+`Test Notification` deliberately bypasses every one of these gates, including an `off`
+level, so you can always verify the pipeline.
 
 ### Template variables
 

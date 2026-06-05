@@ -5,5 +5,6 @@ export const COMMAND_IDS = {
   uninstallClaudeHooks: `${CONFIG_SECTION}.uninstallClaudeHooks`,
   testNotification: `${CONFIG_SECTION}.testNotification`,
   openSettings: `${CONFIG_SECTION}.openSettings`,
-  toggleMute: `${CONFIG_SECTION}.toggleMute`
+  toggleMute: `${CONFIG_SECTION}.toggleMute`,
+  pickEventSound: `${CONFIG_SECTION}.pickEventSound`
 } as const;

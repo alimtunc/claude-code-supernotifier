@@ -1,3 +1,5 @@
+import type { NotificationLevel } from '../types';
+
 export interface HookInputEvent {
   cwd?: string;
   hook_event_name?: string;
@@ -25,6 +27,10 @@ export interface HookConfig {
   permissionSound?: string;
   questionSound?: string;
   subagentStopSound?: string;
+  stopLevel?: NotificationLevel;
+  permissionLevel?: NotificationLevel;
+  questionLevel?: NotificationLevel;
+  subagentStopLevel?: NotificationLevel;
   notificationStyle?: 'system' | 'banner';
   titleTemplate?: string;
   messageTemplate?: string;

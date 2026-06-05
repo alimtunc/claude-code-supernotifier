@@ -1,12 +1,18 @@
 import * as cp from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { effectiveSound, resolveLevel } from '../shared/level';
 import { resolveSound } from '../shared/sound';
 import type { HookConfig, NormalisedEvent } from './types';
 
 export function notify(event: NormalisedEvent, config: HookConfig): void {
   const binary = config.notifierBinaryPath;
   if (!binary) {
+    return;
+  }
+
+  const level = resolveLevel(event.event, config);
+  if (level === 'off') {
     return;
   }
 
@@ -24,7 +30,7 @@ export function notify(event: NormalisedEvent, config: HookConfig): void {
   ];
 
   const sound = resolveSound(event.event, config);
-  if (sound) {
+  if (sound && effectiveSound(level)) {
     args.push('--sound', sound);
   }
 

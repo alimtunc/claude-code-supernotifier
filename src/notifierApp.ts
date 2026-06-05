@@ -21,6 +21,26 @@ export function notifierBinaryPath(): string {
   return path.join(installedNotifierAppPath(), 'Contents', 'MacOS', 'ClaudeCodeSupernotifier');
 }
 
+const SYSTEM_SOUNDS_DIR = '/System/Library/Sounds';
+
+export function previewSound(name: string): void {
+  if (!name || process.platform !== 'darwin') {
+    return;
+  }
+  try {
+    const child = cp.spawn('afplay', [path.join(SYSTEM_SOUNDS_DIR, `${name}.aiff`)], {
+      detached: true,
+      stdio: 'ignore'
+    });
+    child.on('error', () => {
+      // Best-effort audition; a missing sound file must never surface a modal.
+    });
+    child.unref();
+  } catch {
+    // Best-effort.
+  }
+}
+
 export function ensureNotifierApp(context: vscode.ExtensionContext): void {
   if (process.platform !== 'darwin') {
     return;

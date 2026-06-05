@@ -51,4 +51,16 @@ describe('runHook — cmux output suppression (04 Part 3)', () => {
     runHook(stopInput, ['--test'], cmuxEnv);
     expect(notifyMock).toHaveBeenCalledTimes(1);
   });
+
+  it('forces the event level to sound+popup under --test so an off level still fires', () => {
+    runHook(stopInput, ['--test'], {});
+    const [, config] = notifyMock.mock.calls[0] as [unknown, { stopLevel?: string }];
+    expect(config.stopLevel).toBe('sound+popup');
+  });
+
+  it('passes the raw config through when not a --test run', () => {
+    runHook(stopInput, [], {});
+    const [, config] = notifyMock.mock.calls[0] as [unknown, { stopLevel?: string }];
+    expect(config.stopLevel).toBeUndefined();
+  });
 });

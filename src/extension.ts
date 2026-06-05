@@ -6,6 +6,7 @@ import { startFocusStateTracker } from './focusState';
 import { ensureNotifierApp } from './notifierApp';
 import { writeRuntimeFiles } from './runtimeFiles';
 import { startStatusBarTracker } from './statusBar';
+import type { SoundEvent } from './types';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -16,6 +17,9 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(COMMAND_IDS.testNotification, () => commands.testNotification(context)),
     vscode.commands.registerCommand(COMMAND_IDS.openSettings, () => commands.openSettings()),
     vscode.commands.registerCommand(COMMAND_IDS.toggleMute, () => commands.toggleMute()),
+    vscode.commands.registerCommand(COMMAND_IDS.pickEventSound, (event?: SoundEvent) =>
+      commands.pickEventSound(event)
+    ),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration(CONFIG_SECTION)) {
         writeRuntimeFiles(context);

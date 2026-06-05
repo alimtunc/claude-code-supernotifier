@@ -12,7 +12,9 @@ import { CONFIG_SECTION } from './constants';
 import { writeRuntimeFiles } from './runtimeFiles';
 import { isMuted } from './shared/mute';
 import { appDir, helperPath, mutedPath } from './shared/paths';
+import { pickEventSound as runSoundPicker } from './soundPicker';
 import { requestStatusBarRefresh } from './statusBar';
+import type { SoundEvent } from './types';
 
 const HELPER_TIMEOUT_MS = 5000;
 
@@ -85,6 +87,16 @@ export async function testNotification(context: vscode.ExtensionContext): Promis
 
 export async function openSettings(): Promise<void> {
   await vscode.commands.executeCommand('workbench.action.openSettings', CONFIG_SECTION);
+}
+
+export async function pickEventSound(event?: SoundEvent): Promise<void> {
+  try {
+    await runSoundPicker(event);
+  } catch (error) {
+    vscode.window.showErrorMessage(
+      `Claude Code SuperNotifier sound picker failed: ${getErrorMessage(error)}`
+    );
+  }
 }
 
 export function toggleMute(): void {

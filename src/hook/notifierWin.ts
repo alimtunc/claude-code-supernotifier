@@ -1,6 +1,7 @@
 import * as cp from 'node:child_process';
 import * as fs from 'node:fs';
 import { NOTIFIER_TOAST_APP_ID } from '../shared/constants';
+import { effectiveSound, resolveLevel } from '../shared/level';
 import { iconPath } from '../shared/paths';
 import { resolveSound } from '../shared/sound';
 import type { HookConfig, NormalisedEvent } from './types';
@@ -8,6 +9,10 @@ import type { HookConfig, NormalisedEvent } from './types';
 const DEFAULT_COMMAND = 'powershell';
 
 export function notify(event: NormalisedEvent, config: HookConfig): void {
+  if (resolveLevel(event.event, config) === 'off') {
+    return;
+  }
+
   const command = config.notifyCommand?.trim() || DEFAULT_COMMAND;
   const script = buildToastScript(event, config);
 
@@ -32,9 +37,9 @@ export function buildToastScript(event: NormalisedEvent, config: HookConfig): st
       : '';
 
   const audioTag =
-    resolveSound(event.event, config) === ''
-      ? '<audio silent="true"/>'
-      : '<audio src="ms-winsoundevent:Notification.Default"/>';
+    effectiveSound(resolveLevel(event.event, config)) && resolveSound(event.event, config) !== ''
+      ? '<audio src="ms-winsoundevent:Notification.Default"/>'
+      : '<audio silent="true"/>';
 
   const toastXml = `<toast><visual><binding template="ToastGeneric"><text>${title}</text><text>${message}</text>${imageTag}</binding></visual>${audioTag}</toast>`;
 

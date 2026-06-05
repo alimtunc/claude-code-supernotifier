@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import { isInsideCmux } from '../shared/env';
 import { tryReadJson } from '../shared/json';
+import { withForcedLevel } from '../shared/level';
 import { appDir, configPath, errorLogPath, eventLogPath } from '../shared/paths';
 import { advanceStage, reasonForEvent, readStageState, shouldFire, writeStageState } from '../shared/stage';
 import { recordTaskStart } from '../shared/taskTimer';
@@ -45,7 +46,9 @@ export function runHook(input: HookInputEvent, argv: string[], env: NodeJS.Proce
     }
   }
 
-  notify(normalised, config);
+  // For --test, force the event's level visible+audible so the notifier's own
+  // off-level backstop can't swallow the diagnostic notification.
+  notify(normalised, isTestRun ? withForcedLevel(config, normalised.event) : config);
 }
 
 function markReasonFired(event: NormalisedEvent): void {

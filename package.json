@@ -107,6 +107,11 @@
         "command": "claudeCodeSupernotifier.toggleMute",
         "category": "Claude Code SuperNotifier",
         "title": "Toggle Mute"
+      },
+      {
+        "command": "claudeCodeSupernotifier.pickEventSound",
+        "category": "Claude Code SuperNotifier",
+        "title": "Pick Event Sound"
       }
     ],
     "configuration": {
@@ -163,6 +168,74 @@
           "type": "string",
           "default": "",
           "markdownDescription": "Sound name for **subagent finished** notifications (`SubagentStop`, requires `notifyOnSubagentStop`). Overrides `sound` when set; leave empty to use the global `sound`. Same per-platform behaviour as `sound`."
+        },
+        "claudeCodeSupernotifier.stopLevel": {
+          "type": "string",
+          "enum": [
+            "sound+popup",
+            "sound",
+            "popup",
+            "off"
+          ],
+          "default": "sound+popup",
+          "markdownEnumDescriptions": [
+            "Show a banner **and** play the sound.",
+            "Play the sound only — no banner.",
+            "Show the banner only — stay silent.",
+            "Suppress the notification entirely."
+          ],
+          "markdownDescription": "Notification level for **Stop** (turn finished) events. Supersedes `notifyOnStop`; when unset the legacy boolean still applies."
+        },
+        "claudeCodeSupernotifier.permissionLevel": {
+          "type": "string",
+          "enum": [
+            "sound+popup",
+            "sound",
+            "popup",
+            "off"
+          ],
+          "default": "sound+popup",
+          "markdownEnumDescriptions": [
+            "Show a banner **and** play the sound.",
+            "Play the sound only — no banner.",
+            "Show the banner only — stay silent.",
+            "Suppress the notification entirely."
+          ],
+          "markdownDescription": "Notification level for **permission** prompts (`PermissionRequest`). Supersedes `notifyOnAttention`; when unset the legacy boolean still applies."
+        },
+        "claudeCodeSupernotifier.questionLevel": {
+          "type": "string",
+          "enum": [
+            "sound+popup",
+            "sound",
+            "popup",
+            "off"
+          ],
+          "default": "sound+popup",
+          "markdownEnumDescriptions": [
+            "Show a banner **and** play the sound.",
+            "Play the sound only — no banner.",
+            "Show the banner only — stay silent.",
+            "Suppress the notification entirely."
+          ],
+          "markdownDescription": "Notification level for **question** prompts (`AskUserQuestion`). Supersedes `notifyOnAttention`; when unset the legacy boolean still applies."
+        },
+        "claudeCodeSupernotifier.subagentStopLevel": {
+          "type": "string",
+          "enum": [
+            "sound+popup",
+            "sound",
+            "popup",
+            "off"
+          ],
+          "default": "off",
+          "markdownEnumDescriptions": [
+            "Show a banner **and** play the sound.",
+            "Play the sound only — no banner.",
+            "Show the banner only — stay silent.",
+            "Suppress the notification entirely."
+          ],
+          "markdownDescription": "Notification level for **subagent finished** events (`SubagentStop`). Defaults to `off`; supersedes `notifyOnSubagentStop` when set."
         },
         "claudeCodeSupernotifier.notifyCommand": {
           "type": "string",

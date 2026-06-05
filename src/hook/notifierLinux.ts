@@ -1,6 +1,7 @@
 import * as cp from 'node:child_process';
 import * as fs from 'node:fs';
 import { NOTIFIER_DISPLAY_NAME } from '../shared/constants';
+import { effectiveSound, resolveLevel } from '../shared/level';
 import { iconPath, stagedSoundPath } from '../shared/paths';
 import { resolveSound } from '../shared/sound';
 import { fallbackSoundFile, freedesktopSoundFile } from '../shared/soundPresets';
@@ -9,6 +10,11 @@ import type { HookConfig, NormalisedEvent } from './types';
 const DEFAULT_COMMAND = 'notify-send';
 
 export function notify(event: NormalisedEvent, config: HookConfig): void {
+  const level = resolveLevel(event.event, config);
+  if (level === 'off') {
+    return;
+  }
+
   const command = config.notifyCommand?.trim() || DEFAULT_COMMAND;
 
   const args = ['--app-name', NOTIFIER_DISPLAY_NAME, '--urgency', 'normal'];
@@ -29,7 +35,9 @@ export function notify(event: NormalisedEvent, config: HookConfig): void {
   });
   child.unref();
 
-  playSound(event, config);
+  if (effectiveSound(level)) {
+    playSound(event, config);
+  }
 }
 
 function playSound(event: NormalisedEvent, config: HookConfig): void {

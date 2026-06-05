@@ -1,3 +1,7 @@
+export type NotificationLevel = 'sound+popup' | 'sound' | 'popup' | 'off';
+
+export type SoundEvent = 'stop' | 'permission' | 'question' | 'subagentStop';
+
 export interface SupernotifierConfig {
   notifyOnStop: boolean;
   notifyOnAttention: boolean;
@@ -9,6 +13,10 @@ export interface SupernotifierConfig {
   permissionSound: string;
   questionSound: string;
   subagentStopSound: string;
+  stopLevel: NotificationLevel;
+  permissionLevel: NotificationLevel;
+  questionLevel: NotificationLevel;
+  subagentStopLevel: NotificationLevel;
   notificationStyle: 'system' | 'banner';
   titleTemplate: string;
   messageTemplate: string;

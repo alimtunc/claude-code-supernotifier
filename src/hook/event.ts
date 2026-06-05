@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { DEFAULTS } from '../shared/constants';
+import { effectiveShowBanner, resolveLevel } from '../shared/level';
 import { isMuted } from '../shared/mute';
 import { getClickedPath, getFocusedPath, getSignalPath } from '../shared/paths';
 import { readStageState, reasonForEvent, shouldFire } from '../shared/stage';
@@ -102,25 +103,23 @@ export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolea
     return false;
   }
 
-  if (event.event === 'Stop') {
-    return config.notifyOnStop !== false;
+  if (event.event === 'PermissionRequest' && event.raw.tool_name === 'AskUserQuestion') {
+    return false;
   }
-  if (event.event === 'Notification') {
-    return config.notifyOnAttention !== false;
-  }
-  if (event.event === 'PermissionRequest') {
-    if (event.raw.tool_name === 'AskUserQuestion') {
-      return false;
-    }
-    return config.notifyOnAttention !== false;
-  }
-  if (event.event === 'PreToolUse' && event.raw.tool_name === 'AskUserQuestion') {
-    return config.notifyOnAttention !== false;
-  }
-  if (event.event === 'SubagentStop') {
-    return config.notifyOnSubagentStop === true;
+  if (isLevelGated(event)) {
+    return effectiveShowBanner(resolveLevel(event.event, config));
   }
   return false;
+}
+
+function isLevelGated(event: NormalisedEvent): boolean {
+  return (
+    event.event === 'Stop' ||
+    event.event === 'Notification' ||
+    event.event === 'PermissionRequest' ||
+    event.event === 'SubagentStop' ||
+    (event.event === 'PreToolUse' && event.raw.tool_name === 'AskUserQuestion')
+  );
 }
 
 function isThresholdEligible(event: NormalisedEvent): boolean {

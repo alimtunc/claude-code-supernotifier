@@ -321,6 +321,50 @@ describe('shouldNotify — subagent interaction suppression (Part 3)', () => {
   });
 });
 
+describe('shouldNotify — per-event levels (03 Part 2)', () => {
+  const stopEvent = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo' }, baseConfig);
+  const permissionEvent = normaliseEvent(
+    { hook_event_name: 'PermissionRequest', cwd: '/tmp/repo' },
+    baseConfig
+  );
+  const questionEvent = normaliseEvent(
+    { hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', cwd: '/tmp/repo' },
+    baseConfig
+  );
+  const subagentEvent = normaliseEvent({ hook_event_name: 'SubagentStop', cwd: '/tmp/repo' }, baseConfig);
+
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+  });
+
+  it('shows the banner for sound+popup and popup, suppresses it for sound and off', () => {
+    expect(shouldNotify(stopEvent, { ...baseConfig, stopLevel: 'sound+popup' })).toBe(true);
+    expect(shouldNotify(stopEvent, { ...baseConfig, stopLevel: 'popup' })).toBe(true);
+    expect(shouldNotify(stopEvent, { ...baseConfig, stopLevel: 'sound' })).toBe(false);
+    expect(shouldNotify(stopEvent, { ...baseConfig, stopLevel: 'off' })).toBe(false);
+  });
+
+  it('gates permission, question and subagent banners on their level', () => {
+    expect(shouldNotify(permissionEvent, { ...baseConfig, permissionLevel: 'sound' })).toBe(false);
+    expect(shouldNotify(permissionEvent, { ...baseConfig, permissionLevel: 'popup' })).toBe(true);
+    expect(shouldNotify(questionEvent, { ...baseConfig, questionLevel: 'off' })).toBe(false);
+    expect(shouldNotify(questionEvent, { ...baseConfig, questionLevel: 'sound+popup' })).toBe(true);
+    expect(shouldNotify(subagentEvent, { ...baseConfig, subagentStopLevel: 'popup' })).toBe(true);
+    expect(shouldNotify(subagentEvent, { ...baseConfig, subagentStopLevel: 'off' })).toBe(false);
+  });
+
+  it('prefers the explicit level over the legacy boolean', () => {
+    expect(shouldNotify(stopEvent, { ...baseConfig, notifyOnStop: true, stopLevel: 'off' })).toBe(false);
+    expect(shouldNotify(stopEvent, { ...baseConfig, notifyOnStop: false, stopLevel: 'popup' })).toBe(true);
+  });
+
+  it('falls back to the legacy booleans when no level is set (back-compat)', () => {
+    expect(shouldNotify(stopEvent, { ...baseConfig, notifyOnStop: false })).toBe(false);
+    expect(shouldNotify(stopEvent, { ...baseConfig, notifyOnStop: true })).toBe(true);
+    expect(shouldNotify(permissionEvent, { ...baseConfig, notifyOnAttention: false })).toBe(false);
+  });
+});
+
 describe('shouldNotify — minimum task-duration threshold (04 Part 1)', () => {
   const stop = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo', session_id: 'sess' }, baseConfig);
   const markerPath = getTaskStartPath('sess');

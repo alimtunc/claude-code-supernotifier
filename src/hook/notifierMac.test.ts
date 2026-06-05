@@ -105,6 +105,41 @@ describe('notifier (macOS)', () => {
     expect(args).not.toContain('--click-touch');
   });
 
+  it('does not spawn when the resolved level is off', () => {
+    notifyMacOS(baseEvent, {
+      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
+      sound: 'Glass',
+      stopLevel: 'off'
+    });
+
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+
+  it('omits --sound when the level is popup but still banners', () => {
+    notifyMacOS(baseEvent, {
+      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
+      sound: 'Glass',
+      stopLevel: 'popup'
+    });
+
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
+    expect(args).not.toContain('--sound');
+    expect(args).toContain('--title');
+  });
+
+  it('attaches --sound when the level is sound', () => {
+    notifyMacOS(baseEvent, {
+      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
+      sound: 'Glass',
+      stopLevel: 'sound'
+    });
+
+    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
+    expect(args).toContain('--sound');
+    expect(args).toContain('Glass');
+  });
+
   it('omits --style when notificationStyle is system (default)', () => {
     notifyMacOS(baseEvent, {
       notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',

@@ -117,6 +117,20 @@ describe('notifier (Linux)', () => {
     expect(cmd).toBe('notify-send');
   });
 
+  it('does not spawn at all when the resolved level is off', () => {
+    notify(baseEvent, { sound: 'Glass', stopLevel: 'off' });
+
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+
+  it('shows the banner but plays no sound when the level is popup', () => {
+    notify(baseEvent, { sound: 'Glass', stopLevel: 'popup' });
+
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    const [cmd] = spawnMock.mock.calls[0] as [string, string[], unknown];
+    expect(cmd).toBe('notify-send');
+  });
+
   it('plays no audio when neither the freedesktop sound nor the staged fallback exists', () => {
     existsMock.mockImplementation((p) => String(p).endsWith('icon.png'));
 

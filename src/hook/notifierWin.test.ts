@@ -71,6 +71,12 @@ describe('notifier (Windows)', () => {
     expect(cmd).toBe('pwsh');
   });
 
+  it('does not spawn when the resolved level is off', () => {
+    notify(baseEvent, { sound: 'Glass', stopLevel: 'off' });
+
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+
   describe('buildToastScript', () => {
     it('embeds the default audio when sound is non-empty', () => {
       const script = buildToastScript(baseEvent, { sound: 'Glass' });
@@ -80,6 +86,16 @@ describe('notifier (Windows)', () => {
     it('emits silent audio when sound is an empty string', () => {
       const script = buildToastScript(baseEvent, { sound: '' });
       expect(script).toContain('<audio silent="true"/>');
+    });
+
+    it('emits silent audio when the level is popup even with a sound set', () => {
+      const script = buildToastScript(baseEvent, { sound: 'Glass', stopLevel: 'popup' });
+      expect(script).toContain('<audio silent="true"/>');
+    });
+
+    it('embeds the default audio when the level is sound', () => {
+      const script = buildToastScript(baseEvent, { sound: 'Glass', stopLevel: 'sound' });
+      expect(script).toContain('<audio src="ms-winsoundevent:Notification.Default"/>');
     });
 
     it('honours a per-event override when the global sound is empty', () => {
