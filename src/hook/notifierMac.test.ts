@@ -69,6 +69,32 @@ describe('notifier (macOS)', () => {
     expect(args).toContain('/tmp/state/clicked');
   });
 
+  it('passes the per-event override sound to --sound and omits the global one', () => {
+    notifyMacOS(
+      { ...baseEvent, event: 'PermissionRequest' },
+      {
+        notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
+        sound: 'Glass',
+        permissionSound: 'Submarine'
+      }
+    );
+
+    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
+    expect(args).toContain('--sound');
+    expect(args).toContain('Submarine');
+    expect(args).not.toContain('Glass');
+  });
+
+  it('omits --sound when the resolved sound is empty', () => {
+    notifyMacOS(baseEvent, {
+      notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',
+      sound: ''
+    });
+
+    const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
+    expect(args).not.toContain('--sound');
+  });
+
   it('omits click-touch when focusOnClick is false', () => {
     notifyMacOS(baseEvent, {
       notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier',

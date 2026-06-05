@@ -2,6 +2,15 @@ export const APP_DIR_NAME = '.claude-code-supernotifier';
 export const HELPER_SCRIPT_NAME = 'hook.js';
 export const CONFIG_FILE_NAME = 'config.json';
 export const ICON_FILE_NAME = 'icon.png';
+export const SOUNDS_DIR_NAME = 'sounds';
+export const FALLBACK_SOUND_DONE = 'done.wav';
+export const FALLBACK_SOUND_NEEDS_INPUT = 'needs-input.wav';
+export const FALLBACK_SOUND_QUESTION = 'question.wav';
+export const FALLBACK_SOUND_FILES = [
+  FALLBACK_SOUND_DONE,
+  FALLBACK_SOUND_NEEDS_INPUT,
+  FALLBACK_SOUND_QUESTION
+] as const;
 export const EVENT_LOG_NAME = 'events.jsonl';
 export const ERROR_LOG_NAME = 'errors.log';
 export const FOCUS_STATE_DIR_NAME = 'focus-state';
@@ -22,6 +31,10 @@ export const DEFAULTS = {
   notifyOnSubagentStop: false,
   suppressSubagentInteractions: true,
   sound: 'Glass',
+  stopSound: '',
+  permissionSound: '',
+  questionSound: '',
+  subagentStopSound: '',
   notificationStyle: 'system',
   titleTemplate: '${repo}',
   messageTemplate: '${eventLabel}${branchSuffix}',

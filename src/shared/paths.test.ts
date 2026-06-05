@@ -13,7 +13,9 @@ import {
   hashWorkspace,
   helperPath,
   iconPath,
-  mutedPath
+  mutedPath,
+  soundsDir,
+  stagedSoundPath
 } from './paths';
 
 describe('paths', () => {
@@ -59,5 +61,16 @@ describe('paths', () => {
   it('mutedPath sits inside appDir and is named muted', () => {
     expect(mutedPath.startsWith(appDir + path.sep)).toBe(true);
     expect(path.basename(mutedPath)).toBe('muted');
+  });
+
+  it('soundsDir sits inside appDir and is named sounds', () => {
+    expect(soundsDir.startsWith(appDir + path.sep)).toBe(true);
+    expect(path.basename(soundsDir)).toBe('sounds');
+  });
+
+  it('stagedSoundPath resolves a file inside soundsDir', () => {
+    const resolved = stagedSoundPath('done.wav');
+    expect(path.dirname(resolved)).toBe(soundsDir);
+    expect(path.basename(resolved)).toBe('done.wav');
   });
 });

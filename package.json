@@ -135,7 +135,27 @@
         "claudeCodeSupernotifier.sound": {
           "type": "string",
           "default": "Glass",
-          "markdownDescription": "macOS notification sound name. Leave empty for no sound. Examples: `Glass`, `Ping`, `Submarine`. On Windows the default toast sound is used (`Notification.Default`) and empty disables it. On Linux the value is ignored (`notify-send` has no portable sound)."
+          "markdownDescription": "Global notification sound name, used as the fallback for every event. Leave empty for no sound. Examples: `Glass`, `Ping`, `Submarine`. macOS plays the named `UNNotificationSound`. On Windows the default toast sound is used (`Notification.Default`) and empty disables it. On Linux the name is mapped to a freedesktop theme sound (played via `paplay`/`aplay`), falling back to a bundled WAV when that theme is missing."
+        },
+        "claudeCodeSupernotifier.stopSound": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Sound name for **Stop** (turn finished) notifications. Overrides `sound` when set; leave empty to use the global `sound`. Same per-platform behaviour as `sound`."
+        },
+        "claudeCodeSupernotifier.permissionSound": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Sound name for **permission** prompts (`PermissionRequest`). Overrides `sound` when set; leave empty to use the global `sound`. Same per-platform behaviour as `sound`."
+        },
+        "claudeCodeSupernotifier.questionSound": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Sound name for **question** prompts (`AskUserQuestion`). Overrides `sound` when set; leave empty to use the global `sound`. Same per-platform behaviour as `sound`."
+        },
+        "claudeCodeSupernotifier.subagentStopSound": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Sound name for **subagent finished** notifications (`SubagentStop`, requires `notifyOnSubagentStop`). Overrides `sound` when set; leave empty to use the global `sound`. Same per-platform behaviour as `sound`."
         },
         "claudeCodeSupernotifier.notifyCommand": {
           "type": "string",

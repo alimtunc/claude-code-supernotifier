@@ -2,6 +2,7 @@ import * as cp from 'node:child_process';
 import * as fs from 'node:fs';
 import { NOTIFIER_TOAST_APP_ID } from '../shared/constants';
 import { iconPath } from '../shared/paths';
+import { resolveSound } from '../shared/sound';
 import type { HookConfig, NormalisedEvent } from './types';
 
 const DEFAULT_COMMAND = 'powershell';
@@ -31,7 +32,9 @@ export function buildToastScript(event: NormalisedEvent, config: HookConfig): st
       : '';
 
   const audioTag =
-    config.sound === '' ? '<audio silent="true"/>' : '<audio src="ms-winsoundevent:Notification.Default"/>';
+    resolveSound(event.event, config) === ''
+      ? '<audio silent="true"/>'
+      : '<audio src="ms-winsoundevent:Notification.Default"/>';
 
   const toastXml = `<toast><visual><binding template="ToastGeneric"><text>${title}</text><text>${message}</text>${imageTag}</binding></visual>${audioTag}</toast>`;
 

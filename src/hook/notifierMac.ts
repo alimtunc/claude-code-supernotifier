@@ -1,6 +1,7 @@
 import * as cp from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { resolveSound } from '../shared/sound';
 import type { HookConfig, NormalisedEvent } from './types';
 
 export function notify(event: NormalisedEvent, config: HookConfig): void {
@@ -22,8 +23,9 @@ export function notify(event: NormalisedEvent, config: HookConfig): void {
     event.signalPath
   ];
 
-  if (config.sound) {
-    args.push('--sound', config.sound);
+  const sound = resolveSound(event.event, config);
+  if (sound) {
+    args.push('--sound', sound);
   }
 
   if (config.notificationStyle && config.notificationStyle !== 'system') {

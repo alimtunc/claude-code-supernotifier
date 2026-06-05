@@ -82,6 +82,14 @@ describe('notifier (Windows)', () => {
       expect(script).toContain('<audio silent="true"/>');
     });
 
+    it('honours a per-event override when the global sound is empty', () => {
+      const script = buildToastScript(
+        { ...baseEvent, event: 'PreToolUse' },
+        { sound: '', questionSound: 'Funk' }
+      );
+      expect(script).toContain('<audio src="ms-winsoundevent:Notification.Default"/>');
+    });
+
     it('XML-escapes title and message', () => {
       const script = buildToastScript(
         { ...baseEvent, title: 'A & B <c>', message: 'd > "e"' },

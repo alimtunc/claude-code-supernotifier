@@ -16,6 +16,10 @@ export function getRuntimeConfig(): SupernotifierConfig {
       DEFAULTS.suppressSubagentInteractions
     ),
     sound: config.get('sound', DEFAULTS.sound),
+    stopSound: config.get('stopSound', DEFAULTS.stopSound),
+    permissionSound: config.get('permissionSound', DEFAULTS.permissionSound),
+    questionSound: config.get('questionSound', DEFAULTS.questionSound),
+    subagentStopSound: config.get('subagentStopSound', DEFAULTS.subagentStopSound),
     notificationStyle: config.get('notificationStyle', DEFAULTS.notificationStyle),
     titleTemplate: config.get('titleTemplate', DEFAULTS.titleTemplate),
     messageTemplate: config.get('messageTemplate', DEFAULTS.messageTemplate),

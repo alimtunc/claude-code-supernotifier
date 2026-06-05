@@ -14,18 +14,24 @@ import {
   HELPER_SCRIPT_NAME,
   ICON_FILE_NAME,
   MUTED_FILE_NAME,
-  SIGNAL_FILE_NAME
+  SIGNAL_FILE_NAME,
+  SOUNDS_DIR_NAME
 } from './constants';
 
 export const appDir = path.join(os.homedir(), APP_DIR_NAME);
 export const helperPath = path.join(appDir, HELPER_SCRIPT_NAME);
 export const configPath = path.join(appDir, CONFIG_FILE_NAME);
 export const iconPath = path.join(appDir, ICON_FILE_NAME);
+export const soundsDir = path.join(appDir, SOUNDS_DIR_NAME);
 export const eventLogPath = path.join(appDir, EVENT_LOG_NAME);
 export const errorLogPath = path.join(appDir, ERROR_LOG_NAME);
 export const mutedPath = path.join(appDir, MUTED_FILE_NAME);
 export const focusStateRoot = path.join(appDir, FOCUS_STATE_DIR_NAME);
 export const claudeSettingsPath = path.join(os.homedir(), CLAUDE_SETTINGS_DIRNAME, CLAUDE_SETTINGS_FILENAME);
+
+export function stagedSoundPath(file: string): string {
+  return path.join(soundsDir, file);
+}
 
 export function hashWorkspace(workspaceRoot: string): string {
   return crypto.createHash('sha1').update(workspaceRoot).digest('hex').slice(0, 12);

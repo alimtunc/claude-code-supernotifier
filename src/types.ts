@@ -4,6 +4,10 @@ export interface SupernotifierConfig {
   notifyOnSubagentStop: boolean;
   suppressSubagentInteractions: boolean;
   sound: string;
+  stopSound: string;
+  permissionSound: string;
+  questionSound: string;
+  subagentStopSound: string;
   notificationStyle: 'system' | 'banner';
   titleTemplate: string;
   messageTemplate: string;
