@@ -3,6 +3,8 @@ import * as path from 'node:path';
 import { DEFAULTS } from '../shared/constants';
 import { isMuted } from '../shared/mute';
 import { getClickedPath, getFocusedPath, getSignalPath } from '../shared/paths';
+import { readStageState, reasonForEvent, shouldFire } from '../shared/stage';
+import { shouldSuppressForThreshold } from '../shared/taskTimer';
 import { renderTemplate, truncate } from '../shared/template';
 import { getGitBranch } from './git';
 import { findWorkspaceRoot } from './workspace';
@@ -75,6 +77,18 @@ export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolea
     return false;
   }
 
+  if (
+    isThresholdEligible(event) &&
+    shouldSuppressForThreshold(event.sessionId, config.minTaskDurationSeconds ?? 0, Date.now())
+  ) {
+    return false;
+  }
+
+  const reason = reasonForEvent(event.event, event.raw.tool_name);
+  if (reason !== null && !shouldFire(readStageState(event.sessionId), reason).fire) {
+    return false;
+  }
+
   const isInteraction =
     event.event === 'PermissionRequest' ||
     (event.event === 'PreToolUse' && event.raw.tool_name === 'AskUserQuestion');
@@ -107,6 +121,14 @@ export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolea
     return config.notifyOnSubagentStop === true;
   }
   return false;
+}
+
+function isThresholdEligible(event: NormalisedEvent): boolean {
+  return (
+    event.event === 'Stop' ||
+    event.event === 'PermissionRequest' ||
+    (event.event === 'PreToolUse' && event.raw.tool_name === 'AskUserQuestion')
+  );
 }
 
 function getEventLabel(

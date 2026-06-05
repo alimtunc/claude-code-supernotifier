@@ -74,6 +74,8 @@ State files live in `~/.claude-code-supernotifier/`:
 - `events.jsonl` — append-only log of every event the helper saw.
 - `errors.log` — crash details from the helper.
 - `focus-state/<sha1>/{signal.json, clicked}` — per-workspace click state.
+- `task-start/<session>.json` — per-session task-start marker for `minTaskDurationSeconds` (swept after 24h).
+- `stage/<session>.json` — per-session dedup state coalescing repeat banners within one prompt (swept after 24h).
 - `muted` — present only while notifications are muted (toggled by the `Toggle Mute` command).
 
 Nothing leaves your machine.
@@ -88,6 +90,7 @@ All settings live under `claudeCodeSupernotifier.*`.
 | `notifyOnAttention`            | `true`                         | Notify on permission/idle prompts and questions (`AskUserQuestion`).                                                                                                                                                                                   |
 | `notifyOnSubagentStop`         | `false`                        | Notify when a `Task` subagent finishes. Off by default to avoid noise during multi-step turns.                                                                                                                                                         |
 | `suppressSubagentInteractions` | `true`                         | Drop permission/question prompts that originate inside a subagent (events carrying an `agent_id`). Top-level prompts are unaffected.                                                                                                                   |
+| `minTaskDurationSeconds`       | `0`                            | Minimum task duration (seconds) before a `Stop`/`PermissionRequest`/`AskUserQuestion` notification fires. Tasks shorter than this are suppressed as noise. `0` disables the threshold; clamped to `0..3600`.                                           |
 | `sound`                        | `Glass`                        | Global sound name, the fallback for every event. macOS plays the named sound; Windows uses its default toast sound when non-empty (silent when empty); Linux maps it to a freedesktop theme sound, falling back to a bundled WAV (see _Sounds_ below). |
 | `stopSound`                    | `""`                           | Per-event sound for **Stop** (turn finished). Empty means use `sound`.                                                                                                                                                                                 |
 | `permissionSound`              | `""`                           | Per-event sound for **permission** prompts. Empty means use `sound`.                                                                                                                                                                                   |
@@ -110,6 +113,14 @@ All settings live under `claudeCodeSupernotifier.*`.
 | `idlePromptLabel`              | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                                                                                                                                                                                                                 |
 | `attentionLabel`               | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events.                                                                                                                                                                                                |
 | `statusBar.enabled`            | `true`                         | Show the live Claude status bar item (`working` / `waiting` / `idle`). Reload the window after toggling.                                                                                                                                               |
+
+### Noise control
+
+Three mechanisms cut redundant banners without changing _which_ events are notifiable:
+
+- **Duration threshold** — set `minTaskDurationSeconds` to suppress `Stop`/`PermissionRequest`/`AskUserQuestion` notifications for turns that finish faster than N seconds (sub-second turns you were already watching). `0` (default) disables it; values clamp to `0..3600`.
+- **Per-prompt dedup** — repeat banners for the same outcome within a single prompt are coalesced to at most one per reason (`done` / `input` / `question`); a new prompt resets the cycle. `SubagentStop` always fires.
+- **cmux awareness** — when Claude runs inside [cmux](https://github.com/cmux), which posts its own native banner, SuperNotifier still logs the event (so the status bar stays accurate) but suppresses its own banner to avoid a double notification. No setting required.
 
 ### Sounds
 

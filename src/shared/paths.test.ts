@@ -9,13 +9,17 @@ import {
   focusStateRoot,
   getClickedPath,
   getSignalPath,
+  getStagePath,
   getStateDir,
+  getTaskStartPath,
   hashWorkspace,
   helperPath,
   iconPath,
   mutedPath,
   soundsDir,
-  stagedSoundPath
+  stagedSoundPath,
+  stageRoot,
+  taskStartRoot
 } from './paths';
 
 describe('paths', () => {
@@ -52,6 +56,22 @@ describe('paths', () => {
     expect(path.dirname(getClickedPath(root))).toBe(getStateDir(root));
     expect(path.basename(getSignalPath(root))).toBe('signal.json');
     expect(path.basename(getClickedPath(root))).toBe('clicked');
+  });
+
+  it('getTaskStartPath sits inside taskStartRoot and is a per-session json file', () => {
+    expect(taskStartRoot.startsWith(appDir + path.sep)).toBe(true);
+    expect(path.basename(taskStartRoot)).toBe('task-start');
+    const resolved = getTaskStartPath('sess-1');
+    expect(path.dirname(resolved)).toBe(taskStartRoot);
+    expect(path.basename(resolved)).toBe('sess-1.json');
+  });
+
+  it('getStagePath sits inside stageRoot and is a per-session json file', () => {
+    expect(stageRoot.startsWith(appDir + path.sep)).toBe(true);
+    expect(path.basename(stageRoot)).toBe('stage');
+    const resolved = getStagePath('sess-1');
+    expect(path.dirname(resolved)).toBe(stageRoot);
+    expect(path.basename(resolved)).toBe('sess-1.json');
   });
 
   it('claudeSettingsPath points at ~/.claude/settings.json', () => {

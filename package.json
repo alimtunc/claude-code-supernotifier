@@ -132,6 +132,13 @@
           "default": true,
           "markdownDescription": "Suppress permission and question prompts that originate inside a `Task` subagent (events carrying an `agent_id`). On by default so nested approvals don't ping; top-level prompts are unaffected."
         },
+        "claudeCodeSupernotifier.minTaskDurationSeconds": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 3600,
+          "markdownDescription": "Minimum task duration, in seconds, before a finished/attention notification fires. Tasks that complete faster than this are treated as noise and suppressed (`Stop`, `PermissionRequest`, and `AskUserQuestion` events). `0` (the default) disables the threshold; values are clamped to `0..3600`."
+        },
         "claudeCodeSupernotifier.sound": {
           "type": "string",
           "default": "Glass",

@@ -1,15 +1,22 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getFocusedPath, mutedPath } from '../shared/paths';
+import { getFocusedPath, getStagePath, getTaskStartPath, mutedPath } from '../shared/paths';
 import { normaliseEvent, shouldNotify } from './event';
 import type { HookConfig } from './types';
 
 vi.mock('node:fs', async () => {
   const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
-  return { ...actual, existsSync: vi.fn(() => false) };
+  return {
+    ...actual,
+    existsSync: vi.fn(() => false),
+    readFileSync: vi.fn(() => {
+      throw new Error('ENOENT');
+    })
+  };
 });
 
-const { existsSync } = await import('node:fs');
+const { existsSync, readFileSync } = await import('node:fs');
 const existsSyncMock = vi.mocked(existsSync);
+const readFileSyncMock = vi.mocked(readFileSync);
 
 const baseConfig: HookConfig = {
   notifyOnStop: true,
@@ -311,5 +318,93 @@ describe('shouldNotify — subagent interaction suppression (Part 3)', () => {
     expect(shouldNotify(stop, baseConfig)).toBe(true);
     expect(shouldNotify(notif, baseConfig)).toBe(true);
     expect(shouldNotify(sub, { ...baseConfig, notifyOnSubagentStop: true })).toBe(true);
+  });
+});
+
+describe('shouldNotify — minimum task-duration threshold (04 Part 1)', () => {
+  const stop = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo', session_id: 'sess' }, baseConfig);
+  const markerPath = getTaskStartPath('sess');
+
+  function stageMarker(startedAt: number): void {
+    existsSyncMock.mockImplementation((p) => p === markerPath);
+    readFileSyncMock.mockImplementation((p) => {
+      if (p === markerPath) {
+        return JSON.stringify({ startedAt, sessionId: 'sess' });
+      }
+      throw new Error('ENOENT');
+    });
+  }
+
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+    readFileSyncMock.mockImplementation(() => {
+      throw new Error('ENOENT');
+    });
+  });
+
+  it('does not suppress when the threshold is disabled (default 0)', () => {
+    stageMarker(Date.now() - 100);
+    expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true })).toBe(true);
+  });
+
+  it('suppresses a sub-threshold Stop when a recent marker exists', () => {
+    stageMarker(Date.now() - 100);
+    expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true, minTaskDurationSeconds: 5 })).toBe(false);
+  });
+
+  it('fires once the task has run at least the threshold', () => {
+    stageMarker(Date.now() - 10_000);
+    expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true, minTaskDurationSeconds: 5 })).toBe(true);
+  });
+
+  it('fails open and fires when the marker is missing', () => {
+    existsSyncMock.mockReturnValue(false);
+    expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true, minTaskDurationSeconds: 5 })).toBe(true);
+  });
+});
+
+describe('shouldNotify — per-session stage dedup (04 Part 2)', () => {
+  const stop = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo', session_id: 'sess' }, baseConfig);
+  const subagent = normaliseEvent(
+    { hook_event_name: 'SubagentStop', cwd: '/tmp/repo', session_id: 'sess' },
+    baseConfig
+  );
+  const stagePath = getStagePath('sess');
+
+  function stageState(firedReasons: string[]): void {
+    existsSyncMock.mockImplementation((p) => p === stagePath);
+    readFileSyncMock.mockImplementation((p) => {
+      if (p === stagePath) {
+        return JSON.stringify({ stageId: 1, firedReasons });
+      }
+      throw new Error('ENOENT');
+    });
+  }
+
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+    readFileSyncMock.mockImplementation(() => {
+      throw new Error('ENOENT');
+    });
+  });
+
+  it('suppresses a Stop whose reason already fired this stage', () => {
+    stageState(['done']);
+    expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true })).toBe(false);
+  });
+
+  it('fires a Stop whose reason has not fired yet this stage', () => {
+    stageState(['input']);
+    expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true })).toBe(true);
+  });
+
+  it('lets SubagentStop bypass dedup even when other reasons fired', () => {
+    stageState(['done', 'input']);
+    expect(shouldNotify(subagent, { ...baseConfig, notifyOnSubagentStop: true })).toBe(true);
+  });
+
+  it('fails open and fires when the stage file is missing', () => {
+    existsSyncMock.mockReturnValue(false);
+    expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true })).toBe(true);
   });
 });

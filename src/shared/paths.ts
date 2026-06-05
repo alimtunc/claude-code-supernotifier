@@ -15,7 +15,9 @@ import {
   ICON_FILE_NAME,
   MUTED_FILE_NAME,
   SIGNAL_FILE_NAME,
-  SOUNDS_DIR_NAME
+  SOUNDS_DIR_NAME,
+  STAGE_DIR_NAME,
+  TASK_START_DIR_NAME
 } from './constants';
 
 export const appDir = path.join(os.homedir(), APP_DIR_NAME);
@@ -27,6 +29,8 @@ export const eventLogPath = path.join(appDir, EVENT_LOG_NAME);
 export const errorLogPath = path.join(appDir, ERROR_LOG_NAME);
 export const mutedPath = path.join(appDir, MUTED_FILE_NAME);
 export const focusStateRoot = path.join(appDir, FOCUS_STATE_DIR_NAME);
+export const taskStartRoot = path.join(appDir, TASK_START_DIR_NAME);
+export const stageRoot = path.join(appDir, STAGE_DIR_NAME);
 export const claudeSettingsPath = path.join(os.homedir(), CLAUDE_SETTINGS_DIRNAME, CLAUDE_SETTINGS_FILENAME);
 
 export function stagedSoundPath(file: string): string {
@@ -51,4 +55,12 @@ export function getClickedPath(workspaceRoot: string): string {
 
 export function getFocusedPath(workspaceRoot: string): string {
   return path.join(getStateDir(workspaceRoot), FOCUSED_FILE_NAME);
+}
+
+export function getTaskStartPath(safeSessionId: string): string {
+  return path.join(taskStartRoot, `${safeSessionId}.json`);
+}
+
+export function getStagePath(safeSessionId: string): string {
+  return path.join(stageRoot, `${safeSessionId}.json`);
 }

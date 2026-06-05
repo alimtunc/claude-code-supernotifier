@@ -14,6 +14,8 @@ export const FALLBACK_SOUND_FILES = [
 export const EVENT_LOG_NAME = 'events.jsonl';
 export const ERROR_LOG_NAME = 'errors.log';
 export const FOCUS_STATE_DIR_NAME = 'focus-state';
+export const TASK_START_DIR_NAME = 'task-start';
+export const STAGE_DIR_NAME = 'stage';
 export const SIGNAL_FILE_NAME = 'signal.json';
 export const CLICKED_FILE_NAME = 'clicked';
 export const FOCUSED_FILE_NAME = 'focused';
@@ -30,6 +32,7 @@ export const DEFAULTS = {
   notifyOnAttention: true,
   notifyOnSubagentStop: false,
   suppressSubagentInteractions: true,
+  minTaskDurationSeconds: 0,
   sound: 'Glass',
   stopSound: '',
   permissionSound: '',

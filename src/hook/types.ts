@@ -19,6 +19,7 @@ export interface HookConfig {
   notifyOnAttention?: boolean;
   notifyOnSubagentStop?: boolean;
   suppressSubagentInteractions?: boolean;
+  minTaskDurationSeconds?: number;
   sound?: string;
   stopSound?: string;
   permissionSound?: string;

@@ -15,6 +15,11 @@ export function getRuntimeConfig(): SupernotifierConfig {
       'suppressSubagentInteractions',
       DEFAULTS.suppressSubagentInteractions
     ),
+    minTaskDurationSeconds: clamp(
+      config.get('minTaskDurationSeconds', DEFAULTS.minTaskDurationSeconds),
+      0,
+      3600
+    ),
     sound: config.get('sound', DEFAULTS.sound),
     stopSound: config.get('stopSound', DEFAULTS.stopSound),
     permissionSound: config.get('permissionSound', DEFAULTS.permissionSound),
@@ -39,4 +44,11 @@ export function getRuntimeConfig(): SupernotifierConfig {
     subagentStopLabel: config.get('subagentStopLabel', DEFAULTS.subagentStopLabel),
     statusBarEnabled: config.get('statusBar.enabled', DEFAULTS.statusBarEnabled)
   };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+  return Math.min(max, Math.max(min, value));
 }
