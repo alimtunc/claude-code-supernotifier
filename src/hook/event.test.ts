@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getFocusedPath, mutedPath } from '../shared/paths';
 import { normaliseEvent, shouldNotify } from './event';
 import type { HookConfig } from './types';
 
@@ -132,13 +133,50 @@ describe('shouldNotify', () => {
   });
 
   it('suppresses notifications when the matching VSCode window is focused', () => {
-    existsSyncMock.mockReturnValue(true);
+    existsSyncMock.mockImplementation((p) => p === getFocusedPath(stopEvent.workspaceRoot));
     expect(shouldNotify(stopEvent, baseConfig)).toBe(false);
   });
 
   it('notifies when no window is focused on the workspace', () => {
     existsSyncMock.mockReturnValue(false);
     expect(shouldNotify(stopEvent, baseConfig)).toBe(true);
+  });
+});
+
+describe('shouldNotify — file-based mute', () => {
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+  });
+
+  it('returns false for every event type when the mute file exists', () => {
+    existsSyncMock.mockImplementation((p) => p === mutedPath);
+    const events = {
+      stop: normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo' }, baseConfig),
+      notif: normaliseEvent({ hook_event_name: 'Notification', cwd: '/tmp/repo' }, baseConfig),
+      perm: normaliseEvent({ hook_event_name: 'PermissionRequest', cwd: '/tmp/repo' }, baseConfig),
+      question: normaliseEvent(
+        { hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', cwd: '/tmp/repo' },
+        baseConfig
+      ),
+      sub: normaliseEvent({ hook_event_name: 'SubagentStop', cwd: '/tmp/repo' }, baseConfig)
+    };
+    expect(shouldNotify(events.stop, { ...baseConfig, notifyOnStop: true })).toBe(false);
+    expect(shouldNotify(events.notif, { ...baseConfig, notifyOnAttention: true })).toBe(false);
+    expect(shouldNotify(events.perm, { ...baseConfig, notifyOnAttention: true })).toBe(false);
+    expect(shouldNotify(events.question, { ...baseConfig, notifyOnAttention: true })).toBe(false);
+    expect(shouldNotify(events.sub, { ...baseConfig, notifyOnSubagentStop: true })).toBe(false);
+  });
+
+  it('overrides the allow-list: mute wins even when the repo is allow-listed', () => {
+    existsSyncMock.mockImplementation((p) => p === mutedPath);
+    const stop = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo' }, baseConfig);
+    expect(shouldNotify(stop, { ...baseConfig, allowedRepos: ['repo'] })).toBe(false);
+  });
+
+  it('does not affect events when the mute file is absent', () => {
+    existsSyncMock.mockReturnValue(false);
+    const stop = normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/repo' }, baseConfig);
+    expect(shouldNotify(stop, baseConfig)).toBe(true);
   });
 });
 
@@ -183,7 +221,7 @@ describe('shouldNotify — permission & question (Part 1)', () => {
   });
 
   it('short-circuits permission/question events when the window is focused', () => {
-    existsSyncMock.mockReturnValue(true);
+    existsSyncMock.mockImplementation((p) => p === getFocusedPath(permissionEvent.workspaceRoot));
     expect(shouldNotify(permissionEvent, baseConfig)).toBe(false);
     expect(shouldNotify(questionEvent, baseConfig)).toBe(false);
   });

@@ -102,6 +102,11 @@
         "command": "claudeCodeSupernotifier.openSettings",
         "category": "Claude Code SuperNotifier",
         "title": "Open Settings"
+      },
+      {
+        "command": "claudeCodeSupernotifier.toggleMute",
+        "category": "Claude Code SuperNotifier",
+        "title": "Toggle Mute"
       }
     ],
     "configuration": {

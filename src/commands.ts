@@ -1,4 +1,5 @@
 import * as cp from 'node:child_process';
+import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
@@ -9,7 +10,9 @@ import {
 } from './claudeHooks';
 import { CONFIG_SECTION } from './constants';
 import { writeRuntimeFiles } from './runtimeFiles';
-import { appDir, helperPath } from './shared/paths';
+import { isMuted } from './shared/mute';
+import { appDir, helperPath, mutedPath } from './shared/paths';
+import { requestStatusBarRefresh } from './statusBar';
 
 const HELPER_TIMEOUT_MS = 5000;
 
@@ -82,6 +85,20 @@ export async function testNotification(context: vscode.ExtensionContext): Promis
 
 export async function openSettings(): Promise<void> {
   await vscode.commands.executeCommand('workbench.action.openSettings', CONFIG_SECTION);
+}
+
+export function toggleMute(): void {
+  try {
+    if (isMuted()) {
+      fs.rmSync(mutedPath);
+    } else {
+      fs.mkdirSync(appDir, { recursive: true });
+      fs.writeFileSync(mutedPath, '');
+    }
+    requestStatusBarRefresh();
+  } catch (error) {
+    vscode.window.showErrorMessage(`Claude Code SuperNotifier mute toggle failed: ${getErrorMessage(error)}`);
+  }
 }
 
 function getWorkspaceCwd(): string {

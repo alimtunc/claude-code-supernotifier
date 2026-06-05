@@ -17,7 +17,9 @@ async function main(): Promise<void> {
 
   appendEvent(normalised);
 
-  if (!shouldNotify(normalised, config)) {
+  // --test is an explicit diagnostic: fire regardless of mute/focus/settings gates.
+  const isTestRun = process.argv.includes('--test');
+  if (!isTestRun && !shouldNotify(normalised, config)) {
     return;
   }
 

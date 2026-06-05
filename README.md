@@ -24,6 +24,7 @@ There are already plenty of "Claude notifier" extensions. SuperNotifier focuses 
 - **Live status bar** — a Claude indicator in the VS Code status bar tells you at a glance whether the session is working, waiting on you, or idle. Click it to jump back into the session.
 - **Cross-platform** — bundled Swift helper on macOS, `notify-send` on Linux, WinRT toast on Windows. No Homebrew, no npm-side dependency.
 - **Quiet when you're already there** — notifications are suppressed automatically when the matching VS Code window has focus.
+- **Mute on demand** — the `Toggle Mute` command silences every notification until you toggle it back on; the status bar shows a mute icon while muted.
 - **Repo-aware** — title and message templates know about the repo and current Git branch.
 - **Native** — real OS-level banners under our own identity, not webview/toast hacks.
 
@@ -39,12 +40,13 @@ The bundled helper (`ClaudeCodeSupernotifier.app`) ships with the VSIX for macOS
 
 ## Commands
 
-| Command                                             | Effect                                             |
-| --------------------------------------------------- | -------------------------------------------------- |
-| `Claude Code SuperNotifier: Install Claude Hooks`   | Registers the helper in `~/.claude/settings.json`. |
-| `Claude Code SuperNotifier: Uninstall Claude Hooks` | Removes the entries managed by this extension.     |
-| `Claude Code SuperNotifier: Test Notification`      | Sends a sample notification through the helper.    |
-| `Claude Code SuperNotifier: Open Settings`          | Opens the SuperNotifier settings section.          |
+| Command                                             | Effect                                                                                        |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `Claude Code SuperNotifier: Install Claude Hooks`   | Registers the helper in `~/.claude/settings.json`.                                            |
+| `Claude Code SuperNotifier: Uninstall Claude Hooks` | Removes the entries managed by this extension.                                                |
+| `Claude Code SuperNotifier: Test Notification`      | Sends a sample notification through the helper.                                               |
+| `Claude Code SuperNotifier: Open Settings`          | Opens the SuperNotifier settings section.                                                     |
+| `Claude Code SuperNotifier: Toggle Mute`            | Silences every notification until toggled off; the status bar shows a mute icon while active. |
 
 ## How it works
 
@@ -72,6 +74,7 @@ State files live in `~/.claude-code-supernotifier/`:
 - `events.jsonl` — append-only log of every event the helper saw.
 - `errors.log` — crash details from the helper.
 - `focus-state/<sha1>/{signal.json, clicked}` — per-workspace click state.
+- `muted` — present only while notifications are muted (toggled by the `Toggle Mute` command).
 
 Nothing leaves your machine.
 

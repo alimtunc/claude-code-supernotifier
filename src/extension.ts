@@ -15,6 +15,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(COMMAND_IDS.uninstallClaudeHooks, () => commands.uninstallClaudeHooks()),
     vscode.commands.registerCommand(COMMAND_IDS.testNotification, () => commands.testNotification(context)),
     vscode.commands.registerCommand(COMMAND_IDS.openSettings, () => commands.openSettings()),
+    vscode.commands.registerCommand(COMMAND_IDS.toggleMute, () => commands.toggleMute()),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration(CONFIG_SECTION)) {
         writeRuntimeFiles(context);

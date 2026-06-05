@@ -8,6 +8,7 @@ export const FOCUS_STATE_DIR_NAME = 'focus-state';
 export const SIGNAL_FILE_NAME = 'signal.json';
 export const CLICKED_FILE_NAME = 'clicked';
 export const FOCUSED_FILE_NAME = 'focused';
+export const MUTED_FILE_NAME = 'muted';
 
 export const NOTIFIER_DISPLAY_NAME = 'Claude Code SuperNotifier';
 export const NOTIFIER_TOAST_APP_ID = 'ClaudeCodeSupernotifier';

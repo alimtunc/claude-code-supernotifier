@@ -5,6 +5,7 @@ import { getRuntimeConfig } from './config';
 import { CONFIG_SECTION } from './constants';
 import { focusClaudeSession } from './focus';
 import { readRecentEvents } from './shared/eventLog';
+import { isMuted } from './shared/mute';
 import { appDir, eventLogPath } from './shared/paths';
 import {
   deriveSessionState,
@@ -21,6 +22,12 @@ const STALENESS_TICK_MS = 60 * 1000;
 interface DisplayState {
   workspaceRoot: string;
   snapshot: SessionSnapshot;
+}
+
+let activeRefresh: (() => void) | null = null;
+
+export function requestStatusBarRefresh(): void {
+  activeRefresh?.();
 }
 
 export function startStatusBarTracker(context: vscode.ExtensionContext): void {
@@ -70,6 +77,7 @@ export function startStatusBarTracker(context: vscode.ExtensionContext): void {
 
   const watcher = watchEventLog(scheduleRefresh);
   const tick = setInterval(refresh, STALENESS_TICK_MS);
+  activeRefresh = refresh;
 
   context.subscriptions.push(
     item,
@@ -78,6 +86,7 @@ export function startStatusBarTracker(context: vscode.ExtensionContext): void {
       if (debounce) clearTimeout(debounce);
       clearInterval(tick);
       watcher.close();
+      activeRefresh = null;
     }),
     vscode.workspace.onDidChangeWorkspaceFolders(refresh)
   );
@@ -115,15 +124,30 @@ function watchEventLog(onChange: () => void): { close: () => void } {
 }
 
 function render(item: vscode.StatusBarItem, current: DisplayState | null): void {
+  const muted = isMuted();
   if (!current || current.snapshot.state === 'inactive') {
-    item.hide();
+    if (!muted) {
+      item.hide();
+      return;
+    }
+    item.text = '$(mute) Claude muted';
+    item.tooltip = mutedTooltip();
+    item.backgroundColor = undefined;
+    item.show();
     return;
   }
   const { state, lastEvent, ageMs } = current.snapshot;
-  item.text = `${iconFor(state)} ${labelFor(state)}`;
-  item.tooltip = buildTooltip(current.workspaceRoot, state, lastEvent?.repo ?? '', ageMs);
+  item.text = `${iconFor(state)} ${labelFor(state)}${muted ? ' $(mute)' : ''}`;
+  item.tooltip = buildTooltip(current.workspaceRoot, state, lastEvent?.repo ?? '', ageMs, muted);
   item.backgroundColor = backgroundFor(state);
   item.show();
+}
+
+function mutedTooltip(): vscode.MarkdownString {
+  const md = new vscode.MarkdownString(undefined, true);
+  md.appendMarkdown('$(mute) **Notifications muted**\n\n');
+  md.appendMarkdown('Run "Toggle Mute" to re-enable Claude Code notifications.');
+  return md;
 }
 
 function iconFor(state: SessionState): string {
@@ -163,13 +187,17 @@ function buildTooltip(
   workspaceRoot: string,
   state: SessionState,
   repo: string,
-  ageMs: number | null
+  ageMs: number | null,
+  muted: boolean
 ): vscode.MarkdownString {
   const display = repo || path.basename(workspaceRoot) || workspaceRoot;
   const headline = headlineFor(state, display);
   const age = ageMs !== null ? formatAge(ageMs) : null;
   const md = new vscode.MarkdownString(undefined, true);
   md.appendMarkdown(`**${headline}**\n\n`);
+  if (muted) {
+    md.appendMarkdown('$(mute) Muted — notifications are silenced.\n\n');
+  }
   if (age) {
     md.appendMarkdown(`Last update ${age} ago\n\n`);
   }

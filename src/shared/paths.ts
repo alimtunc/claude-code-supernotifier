@@ -13,6 +13,7 @@ import {
   FOCUSED_FILE_NAME,
   HELPER_SCRIPT_NAME,
   ICON_FILE_NAME,
+  MUTED_FILE_NAME,
   SIGNAL_FILE_NAME
 } from './constants';
 
@@ -22,6 +23,7 @@ export const configPath = path.join(appDir, CONFIG_FILE_NAME);
 export const iconPath = path.join(appDir, ICON_FILE_NAME);
 export const eventLogPath = path.join(appDir, EVENT_LOG_NAME);
 export const errorLogPath = path.join(appDir, ERROR_LOG_NAME);
+export const mutedPath = path.join(appDir, MUTED_FILE_NAME);
 export const focusStateRoot = path.join(appDir, FOCUS_STATE_DIR_NAME);
 export const claudeSettingsPath = path.join(os.homedir(), CLAUDE_SETTINGS_DIRNAME, CLAUDE_SETTINGS_FILENAME);
 

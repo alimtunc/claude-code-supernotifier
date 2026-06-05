@@ -12,7 +12,8 @@ import {
   getStateDir,
   hashWorkspace,
   helperPath,
-  iconPath
+  iconPath,
+  mutedPath
 } from './paths';
 
 describe('paths', () => {
@@ -53,5 +54,10 @@ describe('paths', () => {
 
   it('claudeSettingsPath points at ~/.claude/settings.json', () => {
     expect(claudeSettingsPath.endsWith(path.join('.claude', 'settings.json'))).toBe(true);
+  });
+
+  it('mutedPath sits inside appDir and is named muted', () => {
+    expect(mutedPath.startsWith(appDir + path.sep)).toBe(true);
+    expect(path.basename(mutedPath)).toBe('muted');
   });
 });
