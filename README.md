@@ -40,14 +40,15 @@ The bundled helper (`ClaudeCodeSupernotifier.app`) ships with the VSIX for macOS
 
 ## Commands
 
-| Command                                             | Effect                                                                                                                         |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `Claude Code SuperNotifier: Install Claude Hooks`   | Registers the helper in `~/.claude/settings.json`.                                                                             |
-| `Claude Code SuperNotifier: Uninstall Claude Hooks` | Removes the entries managed by this extension.                                                                                 |
-| `Claude Code SuperNotifier: Test Notification`      | Sends a sample notification through the helper.                                                                                |
-| `Claude Code SuperNotifier: Open Settings`          | Opens the SuperNotifier settings section.                                                                                      |
-| `Claude Code SuperNotifier: Toggle Mute`            | Silences every notification until toggled off; the status bar shows a mute icon while active.                                  |
-| `Claude Code SuperNotifier: Pick Event Sound`       | Opens a sound picker that previews each platform sound live as you arrow through the list, then saves it for the chosen event. |
+| Command                                                | Effect                                                                                                                         |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `Claude Code SuperNotifier: Install Claude Hooks`      | Registers the helper in `~/.claude/settings.json`.                                                                             |
+| `Claude Code SuperNotifier: Uninstall Claude Hooks`    | Removes the entries managed by this extension.                                                                                 |
+| `Claude Code SuperNotifier: Test Notification`         | Sends a sample notification through the helper.                                                                                |
+| `Claude Code SuperNotifier: Open Settings`             | Opens the SuperNotifier settings section.                                                                                      |
+| `Claude Code SuperNotifier: Toggle Mute`               | Silences every notification until toggled off; the status bar shows a mute icon while active.                                  |
+| `Claude Code SuperNotifier: Pick Event Sound`          | Opens a sound picker that previews each platform sound live as you arrow through the list, then saves it for the chosen event. |
+| `Claude Code SuperNotifier: Set Minimum Task Duration` | Prompts for the `minTaskDurationSeconds` threshold (validated/clamped to `0..3600`); also reachable from the status-bar panel. |
 
 ## How it works
 
@@ -117,7 +118,7 @@ All settings live under `claudeCodeSupernotifier.*`.
 | `questionLabel`                | `Claude is asking a question`  | `${eventLabel}` text for `AskUserQuestion` prompts.                                                                                                                                                                                                    |
 | `idlePromptLabel`              | `Claude is waiting for input`  | `${eventLabel}` text for idle prompts.                                                                                                                                                                                                                 |
 | `attentionLabel`               | `Claude needs you`             | Fallback `${eventLabel}` for other Notification events.                                                                                                                                                                                                |
-| `statusBar.enabled`            | `true`                         | Show the live Claude status bar item (`working` / `waiting` / `idle`). Reload the window after toggling.                                                                                                                                               |
+| `statusBar.enabled`            | `true`                         | Show the live Claude status bar item (`working` / `waiting` / `idle`). Toggling applies immediately — no window reload. Hover the item for an interactive panel (mute, per-event sounds, threshold, settings).                                         |
 
 ### Noise control
 

@@ -6,5 +6,6 @@ export const COMMAND_IDS = {
   testNotification: `${CONFIG_SECTION}.testNotification`,
   openSettings: `${CONFIG_SECTION}.openSettings`,
   toggleMute: `${CONFIG_SECTION}.toggleMute`,
-  pickEventSound: `${CONFIG_SECTION}.pickEventSound`
+  pickEventSound: `${CONFIG_SECTION}.pickEventSound`,
+  setThreshold: `${CONFIG_SECTION}.setThreshold`
 } as const;

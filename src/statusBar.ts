@@ -6,15 +6,19 @@ import { CONFIG_SECTION } from './constants';
 import { focusClaudeSession } from './focus';
 import { readRecentEvents } from './shared/eventLog';
 import { isMuted } from './shared/mute';
+import { buildPanelMarkdown, type PanelEventSound, type PanelState } from './shared/panelMarkdown';
 import { appDir, eventLogPath } from './shared/paths';
+import { createRestartable } from './shared/restartable';
 import {
   deriveSessionState,
   pickHighestPriority,
   type SessionSnapshot,
   type SessionState
 } from './shared/sessionState';
+import type { SupernotifierConfig } from './types';
 
 const STATUS_BAR_COMMAND = `${CONFIG_SECTION}.statusBarClick`;
+const STATUS_BAR_ENABLED_KEY = `${CONFIG_SECTION}.statusBar.enabled`;
 const REFRESH_DEBOUNCE_MS = 200;
 const IDLE_HIDE_AFTER_MS = 10 * 60 * 1000;
 const STALENESS_TICK_MS = 60 * 1000;
@@ -31,26 +35,34 @@ export function requestStatusBarRefresh(): void {
 }
 
 export function startStatusBarTracker(context: vscode.ExtensionContext): void {
-  if (!getRuntimeConfig().statusBarEnabled) {
-    return;
-  }
+  const tracker = createRestartable(createTracker);
 
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (!event.affectsConfiguration(STATUS_BAR_ENABLED_KEY)) {
+        return;
+      }
+      if (getRuntimeConfig().statusBarEnabled) {
+        tracker.start();
+      } else {
+        tracker.stop();
+      }
+    }),
+    new vscode.Disposable(() => tracker.stop())
+  );
+
+  if (getRuntimeConfig().statusBarEnabled) {
+    tracker.start();
+  }
+}
+
+function createTracker(): vscode.Disposable[] {
   const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   item.command = STATUS_BAR_COMMAND;
   item.name = 'Claude Code SuperNotifier';
 
   let current: DisplayState | null = null;
   const dismissedAt = new Map<string, string>();
-
-  const click = vscode.commands.registerCommand(STATUS_BAR_COMMAND, () => {
-    if (!current?.snapshot.lastEvent) return;
-    dismissedAt.set(current.workspaceRoot, current.snapshot.lastEvent.createdAt);
-    void focusClaudeSession({
-      cwd: current.workspaceRoot,
-      sessionId: current.snapshot.lastEvent.sessionId || undefined
-    });
-    refresh();
-  });
 
   const refresh = (): void => {
     const events = readRecentEvents();
@@ -69,6 +81,16 @@ export function startStatusBarTracker(context: vscode.ExtensionContext): void {
     render(item, current);
   };
 
+  const click = vscode.commands.registerCommand(STATUS_BAR_COMMAND, () => {
+    if (!current?.snapshot.lastEvent) return;
+    dismissedAt.set(current.workspaceRoot, current.snapshot.lastEvent.createdAt);
+    void focusClaudeSession({
+      cwd: current.workspaceRoot,
+      sessionId: current.snapshot.lastEvent.sessionId || undefined
+    });
+    refresh();
+  });
+
   let debounce: NodeJS.Timeout | undefined;
   const scheduleRefresh = (): void => {
     if (debounce) clearTimeout(debounce);
@@ -77,21 +99,24 @@ export function startStatusBarTracker(context: vscode.ExtensionContext): void {
 
   const watcher = watchEventLog(scheduleRefresh);
   const tick = setInterval(refresh, STALENESS_TICK_MS);
-  activeRefresh = refresh;
+  const folderListener = vscode.workspace.onDidChangeWorkspaceFolders(refresh);
 
-  context.subscriptions.push(
+  activeRefresh = refresh;
+  refresh();
+
+  return [
     item,
     click,
+    folderListener,
     new vscode.Disposable(() => {
       if (debounce) clearTimeout(debounce);
       clearInterval(tick);
       watcher.close();
-      activeRefresh = null;
-    }),
-    vscode.workspace.onDidChangeWorkspaceFolders(refresh)
-  );
-
-  refresh();
+      if (activeRefresh === refresh) {
+        activeRefresh = null;
+      }
+    })
+  ];
 }
 
 function applyDismissal(snapshot: SessionSnapshot, ack: string | undefined): SessionSnapshot {
@@ -131,23 +156,69 @@ function render(item: vscode.StatusBarItem, current: DisplayState | null): void 
       return;
     }
     item.text = '$(mute) Claude muted';
-    item.tooltip = mutedTooltip();
+    item.tooltip = buildPanelTooltip(toPanelState(current, muted));
     item.backgroundColor = undefined;
     item.show();
     return;
   }
-  const { state, lastEvent, ageMs } = current.snapshot;
+  const { state } = current.snapshot;
   item.text = `${iconFor(state)} ${labelFor(state)}${muted ? ' $(mute)' : ''}`;
-  item.tooltip = buildTooltip(current.workspaceRoot, state, lastEvent?.repo ?? '', ageMs, muted);
+  item.tooltip = buildPanelTooltip(toPanelState(current, muted));
   item.backgroundColor = backgroundFor(state);
   item.show();
 }
 
-function mutedTooltip(): vscode.MarkdownString {
-  const md = new vscode.MarkdownString(undefined, true);
-  md.appendMarkdown('$(mute) **Notifications muted**\n\n');
-  md.appendMarkdown('Run "Toggle Mute" to re-enable Claude Code notifications.');
+function buildPanelTooltip(state: PanelState): vscode.MarkdownString {
+  const md = new vscode.MarkdownString(buildPanelMarkdown(state), true);
+  md.isTrusted = true;
+  md.supportThemeIcons = true;
   return md;
+}
+
+function toPanelState(current: DisplayState | null, muted: boolean): PanelState {
+  const config = getRuntimeConfig();
+  const snapshot = current?.snapshot ?? null;
+  const repo = current
+    ? snapshot?.lastEvent?.repo || path.basename(current.workspaceRoot) || current.workspaceRoot
+    : workspaceDisplayName();
+  return {
+    state: snapshot?.state ?? 'inactive',
+    repo,
+    ageMs: snapshot?.ageMs ?? null,
+    muted,
+    eventSounds: eventSoundsFor(config),
+    thresholdSeconds: config.minTaskDurationSeconds
+  };
+}
+
+function eventSoundsFor(config: SupernotifierConfig): PanelEventSound[] {
+  return [
+    { event: 'stop', label: 'Finished', sound: effectiveSoundName(config.stopSound, config.sound) },
+    {
+      event: 'permission',
+      label: 'Permission',
+      sound: effectiveSoundName(config.permissionSound, config.sound)
+    },
+    {
+      event: 'question',
+      label: 'Question',
+      sound: effectiveSoundName(config.questionSound, config.sound)
+    },
+    {
+      event: 'subagentStop',
+      label: 'Subagent',
+      sound: effectiveSoundName(config.subagentStopSound, config.sound)
+    }
+  ];
+}
+
+function effectiveSoundName(perEvent: string, global: string): string {
+  return perEvent || global || 'No sound';
+}
+
+function workspaceDisplayName(): string {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+  return folder ? path.basename(folder.uri.fsPath) : '';
 }
 
 function iconFor(state: SessionState): string {
@@ -181,48 +252,4 @@ function backgroundFor(state: SessionState): vscode.ThemeColor | undefined {
     return new vscode.ThemeColor('statusBarItem.warningBackground');
   }
   return undefined;
-}
-
-function buildTooltip(
-  workspaceRoot: string,
-  state: SessionState,
-  repo: string,
-  ageMs: number | null,
-  muted: boolean
-): vscode.MarkdownString {
-  const display = repo || path.basename(workspaceRoot) || workspaceRoot;
-  const headline = headlineFor(state, display);
-  const age = ageMs !== null ? formatAge(ageMs) : null;
-  const md = new vscode.MarkdownString(undefined, true);
-  md.appendMarkdown(`**${headline}**\n\n`);
-  if (muted) {
-    md.appendMarkdown('$(mute) Muted — notifications are silenced.\n\n');
-  }
-  if (age) {
-    md.appendMarkdown(`Last update ${age} ago\n\n`);
-  }
-  md.appendMarkdown('Click to focus the Claude Code session.');
-  return md;
-}
-
-function headlineFor(state: SessionState, repo: string): string {
-  switch (state) {
-    case 'running':
-      return `Claude is working in ${repo}`;
-    case 'waiting':
-      return `Claude is waiting in ${repo}`;
-    case 'idle':
-      return `Claude is idle in ${repo}`;
-    case 'inactive':
-      return `No recent Claude activity in ${repo}`;
-  }
-}
-
-function formatAge(ageMs: number): string {
-  const seconds = Math.max(0, Math.round(ageMs / 1000));
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.round(minutes / 60);
-  return `${hours}h`;
 }

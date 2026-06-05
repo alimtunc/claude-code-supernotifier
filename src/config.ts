@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { CONFIG_SECTION } from './constants';
 import { notifierBinaryPath } from './notifierApp';
 import { DEFAULTS } from './shared/constants';
+import { clampTaskDuration } from './shared/threshold';
 import type { SupernotifierConfig } from './types';
 
 export function getRuntimeConfig(): SupernotifierConfig {
@@ -15,10 +16,8 @@ export function getRuntimeConfig(): SupernotifierConfig {
       'suppressSubagentInteractions',
       DEFAULTS.suppressSubagentInteractions
     ),
-    minTaskDurationSeconds: clamp(
-      config.get('minTaskDurationSeconds', DEFAULTS.minTaskDurationSeconds),
-      0,
-      3600
+    minTaskDurationSeconds: clampTaskDuration(
+      config.get('minTaskDurationSeconds', DEFAULTS.minTaskDurationSeconds)
     ),
     sound: config.get('sound', DEFAULTS.sound),
     stopSound: config.get('stopSound', DEFAULTS.stopSound),
@@ -48,11 +47,4 @@ export function getRuntimeConfig(): SupernotifierConfig {
     subagentStopLabel: config.get('subagentStopLabel', DEFAULTS.subagentStopLabel),
     statusBarEnabled: config.get('statusBar.enabled', DEFAULTS.statusBarEnabled)
   };
-}
-
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min;
-  }
-  return Math.min(max, Math.max(min, value));
 }

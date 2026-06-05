@@ -112,6 +112,11 @@
         "command": "claudeCodeSupernotifier.pickEventSound",
         "category": "Claude Code SuperNotifier",
         "title": "Pick Event Sound"
+      },
+      {
+        "command": "claudeCodeSupernotifier.setThreshold",
+        "category": "Claude Code SuperNotifier",
+        "title": "Set Minimum Task Duration"
       }
     ],
     "configuration": {
@@ -331,7 +336,7 @@
         "claudeCodeSupernotifier.statusBar.enabled": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Show a Claude Code status bar item that reflects the current session state (`working`, `waiting`, `idle`). Click it to focus the matching Claude Code session. Reload the window after changing this setting."
+          "markdownDescription": "Show a Claude Code status bar item that reflects the current session state (`working`, `waiting`, `idle`). Click it to focus the matching Claude Code session. Toggling this setting applies immediately."
         }
       }
     }

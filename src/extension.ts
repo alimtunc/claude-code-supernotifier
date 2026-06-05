@@ -20,6 +20,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(COMMAND_IDS.pickEventSound, (event?: SoundEvent) =>
       commands.pickEventSound(event)
     ),
+    vscode.commands.registerCommand(COMMAND_IDS.setThreshold, () => commands.setThreshold()),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration(CONFIG_SECTION)) {
         writeRuntimeFiles(context);

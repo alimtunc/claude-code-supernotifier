@@ -10,8 +10,10 @@ import {
 } from './claudeHooks';
 import { CONFIG_SECTION } from './constants';
 import { writeRuntimeFiles } from './runtimeFiles';
+import { DEFAULTS } from './shared/constants';
 import { isMuted } from './shared/mute';
 import { appDir, helperPath, mutedPath } from './shared/paths';
+import { clampTaskDuration, parseTaskDuration, validateTaskDuration } from './shared/threshold';
 import { pickEventSound as runSoundPicker } from './soundPicker';
 import { requestStatusBarRefresh } from './statusBar';
 import type { SoundEvent } from './types';
@@ -92,9 +94,34 @@ export async function openSettings(): Promise<void> {
 export async function pickEventSound(event?: SoundEvent): Promise<void> {
   try {
     await runSoundPicker(event);
+    requestStatusBarRefresh();
   } catch (error) {
     vscode.window.showErrorMessage(
       `Claude Code SuperNotifier sound picker failed: ${getErrorMessage(error)}`
+    );
+  }
+}
+
+export async function setThreshold(): Promise<void> {
+  const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+  const current = clampTaskDuration(config.get('minTaskDurationSeconds', DEFAULTS.minTaskDurationSeconds));
+  const input = await vscode.window.showInputBox({
+    title: 'Minimum task duration (seconds)',
+    prompt:
+      'Suppress finished/attention notifications for turns shorter than this. 0 disables the threshold.',
+    value: String(current),
+    validateInput: validateTaskDuration
+  });
+  if (input === undefined) {
+    return;
+  }
+  try {
+    const value = clampTaskDuration(parseTaskDuration(input));
+    await config.update('minTaskDurationSeconds', value, vscode.ConfigurationTarget.Global);
+    requestStatusBarRefresh();
+  } catch (error) {
+    vscode.window.showErrorMessage(
+      `Claude Code SuperNotifier set threshold failed: ${getErrorMessage(error)}`
     );
   }
 }
