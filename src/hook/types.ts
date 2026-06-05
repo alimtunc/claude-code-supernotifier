@@ -63,6 +63,7 @@ export interface NormalisedEvent {
   signalPath: string;
   title: string;
   message: string;
+  pidChain: number[];
   createdAt: string;
   raw: HookInputEvent;
 }

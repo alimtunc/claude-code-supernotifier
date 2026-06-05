@@ -1,4 +1,5 @@
 import * as cp from 'node:child_process';
+import * as fs from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { notify as notifyMacOS } from './notifierMac';
 import type { HookConfig, NormalisedEvent } from './types';
@@ -23,6 +24,7 @@ const baseEvent: NormalisedEvent = {
   signalPath: '/tmp/state/signal.json',
   title: 'Claude: repo',
   message: 'Finished · main',
+  pidChain: [],
   createdAt: '2026-05-04T00:00:00.000Z',
   raw: {}
 };
@@ -159,5 +161,15 @@ describe('notifier (macOS)', () => {
     const [, args] = spawnMock.mock.calls[0] as [string, string[], unknown];
     expect(args).toContain('--style');
     expect(args).toContain('banner');
+  });
+
+  it('persists the pidChain into the signal payload', () => {
+    notifyMacOS(
+      { ...baseEvent, pidChain: [12, 34] },
+      { notifierBinaryPath: '/tmp/bundle/ClaudeCodeSupernotifier' }
+    );
+
+    const written: unknown = JSON.parse(fs.readFileSync(baseEvent.signalPath, 'utf8'));
+    expect(written).toMatchObject({ pidChain: [12, 34] });
   });
 });

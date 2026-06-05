@@ -3,10 +3,12 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { CONFIG_SECTION } from './constants';
 import { DEFAULTS } from './shared/constants';
+import { isPidInChain } from './shared/pidChain';
 
 export interface FocusRequest {
   cwd?: string;
   sessionId?: string;
+  pidChain?: number[];
 }
 
 const OPEN_LAST_COMMAND = 'claude-vscode.editor.openLast';
@@ -53,12 +55,33 @@ export async function focusClaudeSession(request: FocusRequest): Promise<void> {
     if (focusCommand) {
       await vscode.commands.executeCommand(focusCommand);
     }
+
+    await revealClaudeTerminal(request.pidChain);
   } catch (error) {
     if (await openFolderFallback(request.cwd)) {
       return;
     }
     const message = error instanceof Error ? error.message : String(error);
     vscode.window.showWarningMessage(`Claude Code SuperNotifier could not focus Claude Code: ${message}`);
+  }
+}
+
+async function revealClaudeTerminal(pidChain: number[] | undefined): Promise<void> {
+  if (!pidChain || pidChain.length === 0) {
+    return;
+  }
+  // Best-effort: a failed terminal reveal must not abort the click or trigger the
+  // folder fallback — window focus is the fallback. So swallow here rather than
+  // letting a rejected processId propagate to focusClaudeSession's catch.
+  try {
+    const terminals = vscode.window.terminals;
+    const pids = await Promise.all(terminals.map((terminal) => terminal.processId));
+    const index = pids.findIndex((pid) => pid !== undefined && isPidInChain(pid, pidChain));
+    if (index !== -1) {
+      terminals[index]?.show();
+    }
+  } catch {
+    // leave the surfaced window focus as the fallback.
   }
 }
 

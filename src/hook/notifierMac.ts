@@ -67,6 +67,7 @@ function writeSignal(event: NormalisedEvent): void {
           transcriptPath: event.transcriptPath,
           title: event.title,
           message: event.message,
+          pidChain: event.pidChain,
           createdAt: event.createdAt
         },
         null,

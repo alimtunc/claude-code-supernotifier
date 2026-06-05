@@ -3,11 +3,14 @@ import * as path from 'node:path';
 import { DEFAULTS } from '../shared/constants';
 import { effectiveShowBanner, resolveLevel } from '../shared/level';
 import { isMuted } from '../shared/mute';
+import { ownedFolder, ownerOf } from '../shared/ownership';
 import { getClickedPath, getFocusedPath, getSignalPath } from '../shared/paths';
 import { readStageState, reasonForEvent, shouldFire } from '../shared/stage';
 import { shouldSuppressForThreshold } from '../shared/taskTimer';
 import { renderTemplate, truncate } from '../shared/template';
 import { getGitBranch } from './git';
+import { readMarkers } from './ownership';
+import { getAncestorPids } from './pid';
 import { findWorkspaceRoot } from './workspace';
 import type { HookConfig, HookInputEvent, NormalisedEvent } from './types';
 
@@ -45,6 +48,7 @@ export function normaliseEvent(input: HookInputEvent, config: HookConfig): Norma
   const workspaceRoot = findWorkspaceRoot(cwd);
   const title = renderTemplate(config.titleTemplate ?? DEFAULTS.titleTemplate, variables);
   const message = renderTemplate(config.messageTemplate ?? DEFAULTS.messageTemplate, variables);
+  const pidChain = isClickableBannerEvent(event, input.tool_name) ? getAncestorPids() : [];
 
   return {
     cwd,
@@ -61,9 +65,18 @@ export function normaliseEvent(input: HookInputEvent, config: HookConfig): Norma
     signalPath: getSignalPath(workspaceRoot),
     title,
     message,
+    pidChain,
     createdAt: new Date().toISOString(),
     raw: input
   };
+}
+
+function isClickableBannerEvent(event: string, toolName: string | undefined): boolean {
+  return (
+    event === 'Stop' ||
+    event === 'PermissionRequest' ||
+    (event === 'PreToolUse' && toolName === 'AskUserQuestion')
+  );
 }
 
 export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolean {
@@ -74,7 +87,12 @@ export function shouldNotify(event: NormalisedEvent, config: HookConfig): boolea
   if (allowedRepos.length > 0 && !allowedRepos.includes(path.basename(event.cwd))) {
     return false;
   }
-  if (fs.existsSync(getFocusedPath(event.workspaceRoot))) {
+  // The owning window (the live window whose folder physically contains the cwd)
+  // decides focus suppression. With no owner, no live window holds the cwd — the
+  // seam for a future terminal-only fallback — so we fall back to the normalised root.
+  const owner = ownerOf(event.cwd, readMarkers());
+  const focusRoot = owner ? (ownedFolder(event.cwd, owner) ?? event.workspaceRoot) : event.workspaceRoot;
+  if (fs.existsSync(getFocusedPath(focusRoot))) {
     return false;
   }
 

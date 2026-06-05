@@ -5,6 +5,8 @@ import { notify } from './notifier';
 import type { HookInputEvent } from './types';
 
 vi.mock('./notifier', () => ({ notify: vi.fn() }));
+vi.mock('./pid', () => ({ getAncestorPids: vi.fn(() => []) }));
+vi.mock('./ownership', () => ({ readMarkers: vi.fn(() => []) }));
 
 vi.mock('node:fs', async () => {
   const actual = await vi.importActual<typeof import('node:fs')>('node:fs');

@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  activeRoot,
   appDir,
   claudeSettingsPath,
   configPath,
@@ -8,6 +9,7 @@ import {
   eventLogPath,
   focusStateRoot,
   getClickedPath,
+  getOwnershipMarkerPath,
   getSignalPath,
   getStagePath,
   getStateDir,
@@ -81,6 +83,17 @@ describe('paths', () => {
   it('mutedPath sits inside appDir and is named muted', () => {
     expect(mutedPath.startsWith(appDir + path.sep)).toBe(true);
     expect(path.basename(mutedPath)).toBe('muted');
+  });
+
+  it('activeRoot sits inside appDir and is named active', () => {
+    expect(activeRoot.startsWith(appDir + path.sep)).toBe(true);
+    expect(path.basename(activeRoot)).toBe('active');
+  });
+
+  it('getOwnershipMarkerPath sits inside activeRoot and is named by pid', () => {
+    const resolved = getOwnershipMarkerPath(4321);
+    expect(path.dirname(resolved)).toBe(activeRoot);
+    expect(path.basename(resolved)).toBe('4321');
   });
 
   it('soundsDir sits inside appDir and is named sounds', () => {

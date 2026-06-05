@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  belongsToWorkspace,
   deriveSessionState,
   pickHighestPriority,
   type EventEntry,
@@ -150,6 +151,34 @@ describe('deriveSessionState', () => {
       idleHideAfterMs: 600_000
     });
     expect(snapshot.state).toBe('running');
+  });
+});
+
+describe('belongsToWorkspace', () => {
+  it('matches when the entry workspaceRoot equals the target', () => {
+    expect(belongsToWorkspace(makeEntry({ workspaceRoot: WORKSPACE, cwd: '/elsewhere' }), WORKSPACE)).toBe(
+      true
+    );
+  });
+
+  it('matches when the entry cwd equals the target', () => {
+    expect(belongsToWorkspace(makeEntry({ workspaceRoot: '', cwd: WORKSPACE }), WORKSPACE)).toBe(true);
+  });
+
+  it('matches a subdirectory cwd', () => {
+    expect(
+      belongsToWorkspace(makeEntry({ workspaceRoot: '', cwd: path.join(WORKSPACE, 'src') }), WORKSPACE)
+    ).toBe(true);
+  });
+
+  it('rejects a sibling that merely shares a prefix (trailing-separator guard)', () => {
+    expect(belongsToWorkspace(makeEntry({ workspaceRoot: '', cwd: `${WORKSPACE}-other` }), WORKSPACE)).toBe(
+      false
+    );
+  });
+
+  it('rejects an empty target workspaceRoot', () => {
+    expect(belongsToWorkspace(makeEntry({ workspaceRoot: '', cwd: WORKSPACE }), '')).toBe(false);
   });
 });
 

@@ -32,6 +32,7 @@ const baseEvent: NormalisedEvent = {
   signalPath: '/tmp/state/signal.json',
   title: 'Claude: repo',
   message: 'Finished · main',
+  pidChain: [],
   createdAt: '2026-05-24T00:00:00.000Z',
   raw: {}
 };

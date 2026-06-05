@@ -10,6 +10,7 @@ interface SignalPayload {
   cwd?: string;
   workspaceRoot?: string;
   sessionId?: string;
+  pidChain?: number[];
 }
 
 export function startClickSignalWatcher(context: vscode.ExtensionContext): void {
@@ -86,7 +87,8 @@ async function handleClicked(clickedPath: string): Promise<void> {
   if (signal) {
     await focusClaudeSession({
       cwd: signal.workspaceRoot ?? signal.cwd,
-      sessionId: signal.sessionId
+      sessionId: signal.sessionId,
+      pidChain: signal.pidChain
     });
   }
 }

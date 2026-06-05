@@ -4,6 +4,7 @@ import * as commands from './commands';
 import { COMMAND_IDS, CONFIG_SECTION } from './constants';
 import { startFocusStateTracker } from './focusState';
 import { ensureNotifierApp } from './notifierApp';
+import { startOwnershipMarker } from './ownershipMarker';
 import { writeRuntimeFiles } from './runtimeFiles';
 import { startStatusBarTracker } from './statusBar';
 import type { SoundEvent } from './types';
@@ -32,6 +33,7 @@ export function activate(context: vscode.ExtensionContext): void {
   writeRuntimeFiles(context);
   startClickSignalWatcher(context);
   startFocusStateTracker(context);
+  startOwnershipMarker(context);
   startStatusBarTracker(context);
 }
 

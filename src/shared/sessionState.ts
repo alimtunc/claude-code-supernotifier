@@ -1,4 +1,4 @@
-import * as path from 'node:path';
+import { cwdInsideFolder } from './ownership';
 
 export type SessionState = 'running' | 'waiting' | 'idle' | 'inactive';
 
@@ -72,9 +72,8 @@ function mapEventToState(entry: EventEntry): SessionState {
   return 'idle';
 }
 
-function belongsToWorkspace(entry: EventEntry, workspaceRoot: string): boolean {
+export function belongsToWorkspace(entry: EventEntry, workspaceRoot: string): boolean {
   if (!workspaceRoot) return false;
   if (entry.workspaceRoot === workspaceRoot) return true;
-  if (entry.cwd === workspaceRoot) return true;
-  return entry.cwd.startsWith(workspaceRoot + path.sep);
+  return cwdInsideFolder(entry.cwd, workspaceRoot);
 }

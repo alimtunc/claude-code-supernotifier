@@ -2,6 +2,7 @@ import * as crypto from 'node:crypto';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import {
+  ACTIVE_DIR_NAME,
   APP_DIR_NAME,
   CLAUDE_SETTINGS_DIRNAME,
   CLAUDE_SETTINGS_FILENAME,
@@ -29,6 +30,7 @@ export const eventLogPath = path.join(appDir, EVENT_LOG_NAME);
 export const errorLogPath = path.join(appDir, ERROR_LOG_NAME);
 export const mutedPath = path.join(appDir, MUTED_FILE_NAME);
 export const focusStateRoot = path.join(appDir, FOCUS_STATE_DIR_NAME);
+export const activeRoot = path.join(appDir, ACTIVE_DIR_NAME);
 export const taskStartRoot = path.join(appDir, TASK_START_DIR_NAME);
 export const stageRoot = path.join(appDir, STAGE_DIR_NAME);
 export const claudeSettingsPath = path.join(os.homedir(), CLAUDE_SETTINGS_DIRNAME, CLAUDE_SETTINGS_FILENAME);
@@ -55,6 +57,10 @@ export function getClickedPath(workspaceRoot: string): string {
 
 export function getFocusedPath(workspaceRoot: string): string {
   return path.join(getStateDir(workspaceRoot), FOCUSED_FILE_NAME);
+}
+
+export function getOwnershipMarkerPath(pid: number): string {
+  return path.join(activeRoot, String(pid));
 }
 
 export function getTaskStartPath(safeSessionId: string): string {

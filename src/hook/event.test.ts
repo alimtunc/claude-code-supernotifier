@@ -14,9 +14,16 @@ vi.mock('node:fs', async () => {
   };
 });
 
+vi.mock('./pid', () => ({ getAncestorPids: vi.fn(() => []) }));
+vi.mock('./ownership', () => ({ readMarkers: vi.fn(() => []) }));
+
 const { existsSync, readFileSync } = await import('node:fs');
 const existsSyncMock = vi.mocked(existsSync);
 const readFileSyncMock = vi.mocked(readFileSync);
+const { getAncestorPids } = await import('./pid');
+const { readMarkers } = await import('./ownership');
+const getAncestorPidsMock = vi.mocked(getAncestorPids);
+const readMarkersMock = vi.mocked(readMarkers);
 
 const baseConfig: HookConfig = {
   notifyOnStop: true,
@@ -108,6 +115,39 @@ describe('normaliseEvent', () => {
         { ...baseConfig, subagentStopLabel: 'Sous-agent terminé' }
       ).eventLabel
     ).toBe('Sous-agent terminé');
+  });
+});
+
+describe('normaliseEvent — pidChain capture (05 Part 2)', () => {
+  afterEach(() => {
+    getAncestorPidsMock.mockReturnValue([]);
+  });
+
+  it('captures the ancestor chain for clickable banner events', () => {
+    getAncestorPidsMock.mockReturnValue([42, 7]);
+    expect(normaliseEvent({ hook_event_name: 'Stop', cwd: '/tmp/r' }, baseConfig).pidChain).toEqual([42, 7]);
+    expect(
+      normaliseEvent({ hook_event_name: 'PermissionRequest', cwd: '/tmp/r' }, baseConfig).pidChain
+    ).toEqual([42, 7]);
+    expect(
+      normaliseEvent(
+        { hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', cwd: '/tmp/r' },
+        baseConfig
+      ).pidChain
+    ).toEqual([42, 7]);
+  });
+
+  it('leaves pidChain empty for events that do not drive clickable banners', () => {
+    getAncestorPidsMock.mockReturnValue([42, 7]);
+    expect(normaliseEvent({ hook_event_name: 'Notification', cwd: '/tmp/r' }, baseConfig).pidChain).toEqual(
+      []
+    );
+    expect(normaliseEvent({ hook_event_name: 'SubagentStop', cwd: '/tmp/r' }, baseConfig).pidChain).toEqual(
+      []
+    );
+    expect(
+      normaliseEvent({ hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd: '/tmp/r' }, baseConfig).pidChain
+    ).toEqual([]);
   });
 });
 
@@ -450,5 +490,39 @@ describe('shouldNotify — per-session stage dedup (04 Part 2)', () => {
   it('fails open and fires when the stage file is missing', () => {
     existsSyncMock.mockReturnValue(false);
     expect(shouldNotify(stop, { ...baseConfig, notifyOnStop: true })).toBe(true);
+  });
+});
+
+describe('shouldNotify — owner-aware focus suppression (05 Part 1)', () => {
+  const ownedStop = normaliseEvent({ hook_event_name: 'Stop', cwd: '/proj/packages/api/src' }, baseConfig);
+  const ownerFolder = '/proj/packages/api';
+
+  afterEach(() => {
+    existsSyncMock.mockReturnValue(false);
+    readMarkersMock.mockReturnValue([]);
+  });
+
+  it('suppresses when the owning window is focused, even if findWorkspaceRoot differs', () => {
+    readMarkersMock.mockReturnValue([{ pid: 111, folders: [ownerFolder] }]);
+    existsSyncMock.mockImplementation((p) => p === getFocusedPath(ownerFolder));
+    expect(shouldNotify(ownedStop, baseConfig)).toBe(false);
+  });
+
+  it('notifies when the owning window is unfocused', () => {
+    readMarkersMock.mockReturnValue([{ pid: 111, folders: [ownerFolder] }]);
+    existsSyncMock.mockReturnValue(false);
+    expect(shouldNotify(ownedStop, baseConfig)).toBe(true);
+  });
+
+  it('ignores a focused non-owner window: the event-root flag is not consulted when an owner exists', () => {
+    readMarkersMock.mockReturnValue([{ pid: 111, folders: [ownerFolder] }]);
+    existsSyncMock.mockImplementation((p) => p === getFocusedPath(ownedStop.workspaceRoot));
+    expect(shouldNotify(ownedStop, baseConfig)).toBe(true);
+  });
+
+  it('falls back to the event workspaceRoot flag when no window owns the cwd', () => {
+    readMarkersMock.mockReturnValue([]);
+    existsSyncMock.mockImplementation((p) => p === getFocusedPath(ownedStop.workspaceRoot));
+    expect(shouldNotify(ownedStop, baseConfig)).toBe(false);
   });
 });
