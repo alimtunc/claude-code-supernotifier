@@ -19,5 +19,5 @@
       ["type-builtin", "type-external", "type-parent", "type-sibling", "type-index"]
     ]
   },
-  "ignorePatterns": ["dist/", "out/", "coverage/", "node_modules/", "*.vsix", "pnpm-lock.yaml"]
+  "ignorePatterns": ["dist/", "out/", "coverage/", "node_modules/", "docs/", "*.vsix", "pnpm-lock.yaml"]
 }
