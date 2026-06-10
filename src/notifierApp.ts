@@ -41,6 +41,32 @@ export function previewSound(name: string): void {
   }
 }
 
+export function clearDeliveredNotifications(folders: readonly string[]): void {
+  if (process.platform !== 'darwin' || folders.length === 0) {
+    return;
+  }
+  const binary = notifierBinaryPath();
+  if (!fs.existsSync(binary)) {
+    return;
+  }
+  const args = ['--clear'];
+  for (const folder of folders) {
+    args.push('--cwd', folder);
+  }
+  try {
+    const child = cp.spawn(binary, args, {
+      detached: true,
+      stdio: 'ignore'
+    });
+    child.on('error', () => {
+      // Best-effort cleanup; a failed clear must never surface a modal.
+    });
+    child.unref();
+  } catch {
+    // Best-effort.
+  }
+}
+
 export function ensureNotifierApp(context: vscode.ExtensionContext): void {
   if (process.platform !== 'darwin') {
     return;

@@ -24,6 +24,7 @@ export interface SupernotifierConfig {
   allowedRepos: string[];
   customRepoNames: Record<string, string>;
   focusOnClick: boolean;
+  clearOnFocus: boolean;
   notifierBinaryPath: string;
   notifyCommand: string;
   claudeOpenSessionCommand: string;

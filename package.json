@@ -2,7 +2,7 @@
   "name": "claude-code-supernotifier",
   "displayName": "Claude Code SuperNotifier",
   "description": "Native desktop notifications for Claude Code sessions: multi-window aware, click-to-focus (macOS), repo-aware templates. Works on macOS, Linux (notify-send) and Windows 10+.",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "publisher": "alimtunc",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -292,6 +292,11 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Open the matching Claude Code session when clicking the notification. macOS only — Linux and Windows notifications are fire-and-forget for now."
+        },
+        "claudeCodeSupernotifier.clearOnFocus": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Remove delivered notifications from Notification Center when you focus the VSCode window they belong to. macOS only."
         },
         "claudeCodeSupernotifier.claudeOpenSessionCommand": {
           "type": "string",

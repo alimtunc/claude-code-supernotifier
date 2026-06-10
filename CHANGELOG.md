@@ -4,6 +4,27 @@ All notable changes to **Claude Code SuperNotifier** are documented in this file
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-06-06
+
+### Added
+
+- Three new notification events — Permission requests, interactive Questions (`AskUserQuestion`), and SubagentStop — with `claudeCodeSupernotifier.notifyOnSubagentStop` and `claudeCodeSupernotifier.suppressSubagentInteractions` to keep subagent activity quiet.
+- `Toggle Mute` command backed by a file-based mute gate, surfaced as a status bar indicator.
+- Per-event sounds (`stopSound`, `permissionSound`, `questionSound`, `subagentStopSound`) with Linux playback via `paplay`/`aplay` and bundled fallback sounds.
+- `Pick Event Sound` command — a platform-aware QuickPick that live-previews each sound before you commit to it.
+- Per-event notification levels (`stopLevel`, `permissionLevel`, `questionLevel`, `subagentStopLevel`).
+- `Set Minimum Task Duration` command and `minTaskDurationSeconds` setting (clamped 0–3600 s) to suppress notifications for short tasks.
+- Interactive trusted-Markdown control panel on the status bar item: mute/unmute, per-event sounds, threshold, and Open Settings, all without leaving the editor.
+- Custom event labels `subagentStopLabel` and `questionLabel`.
+- `clearOnFocus` setting (default on, macOS only): focusing a VSCode window removes that window's delivered notifications from Notification Center.
+
+### Changed
+
+- Status bar enable/disable is now reactive — flipping `claudeCodeSupernotifier.statusBar.enabled` applies live, no window reload required.
+- Per-PID cwd ownership: each live window publishes a per-PID marker listing its workspace folders; the hook resolves the owning window by longest-prefix cwd match so exactly one window decides suppression per session.
+- Clicking a banner now reveals the integrated terminal whose process is in the notifying hook's ancestor chain (piggybacks on `focusOnClick`; no new setting).
+- Per-session stage dedup and cmux awareness to cut duplicate notifications.
+
 ## [0.7.0] - 2026-05-24
 
 ### Added

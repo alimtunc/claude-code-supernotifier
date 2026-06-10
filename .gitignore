@@ -28,3 +28,5 @@ coverage/
 
 # Claude Code local state (worktrees, etc.)
 .claude/
+
+superkick.db*

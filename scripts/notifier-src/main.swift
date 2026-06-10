@@ -12,6 +12,8 @@ struct Args {
     var prime: Bool = false
     var dryRun: Bool = false
     var style: String = "system"
+    var cwds: [String] = []
+    var clear: Bool = false
 }
 
 func parseArgs() -> Args {
@@ -27,7 +29,9 @@ func parseArgs() -> Args {
         case "--click-touch": if let v = it.next() { a.clickTouch = v }
         case "--timeout":     if let v = it.next(), let d = Double(v) { a.timeout = d }
         case "--style":       if let v = it.next() { a.style = v }
+        case "--cwd":         if let v = it.next() { a.cwds.append(v) }
         case "--prime":       a.prime = true
+        case "--clear":       a.clear = true
         case "--dry-run":     a.dryRun = true
         default: break
         }
@@ -93,7 +97,9 @@ if args.dryRun {
         "clickTouch": args.clickTouch as Any,
         "timeout": args.timeout,
         "prime": args.prime,
-        "style": args.style
+        "style": args.style,
+        "cwds": args.cwds,
+        "clear": args.clear
     ]
     if let data = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted]),
        let s = String(data: data, encoding: .utf8) {
@@ -102,9 +108,45 @@ if args.dryRun {
     exit(0)
 }
 
+if args.clear {
+    // Refuse to clear without a filter: a bare `--clear` would purge every
+    // delivered notification of the bundle, including other windows'.
+    let folders = args.cwds.filter { !$0.isEmpty }
+    if folders.isEmpty {
+        exit(0)
+    }
+    let center = UNUserNotificationCenter.current()
+    let clearGroup = DispatchGroup()
+    clearGroup.enter()
+    center.getDeliveredNotifications { delivered in
+        let ids = delivered
+            .filter { notification in
+                guard let cwd = notification.request.content.userInfo["cwd"] as? String else {
+                    return false
+                }
+                // Prefix match: the hook stamps Claude's cwd, which may be a
+                // subdirectory of the focused window's workspace folder.
+                return folders.contains { cwd == $0 || cwd.hasPrefix($0 + "/") }
+            }
+            .map { $0.request.identifier }
+        if !ids.isEmpty {
+            center.removeDeliveredNotifications(withIdentifiers: ids)
+        }
+        clearGroup.leave()
+    }
+    clearGroup.wait()
+    // removeDeliveredNotifications is fire-and-forget XPC; a second round-trip on
+    // the same connection guarantees it was processed before the process exits.
+    let flushGroup = DispatchGroup()
+    flushGroup.enter()
+    center.getDeliveredNotifications { _ in flushGroup.leave() }
+    flushGroup.wait()
+    exit(0)
+}
+
 // macOS may relaunch the .app to deliver a notification response. That fresh
 // invocation has no CLI args and would otherwise post an empty notification.
-// Refuse to post when called without --message, --prime, or --dry-run.
+// Refuse to post when called without --message, --prime, --clear, or --dry-run.
 if !args.prime && args.message.isEmpty {
     exit(0)
 }
@@ -142,6 +184,10 @@ if let s = args.sound, !s.isEmpty {
 }
 if let g = args.group, !g.isEmpty {
     content.threadIdentifier = g
+}
+if let c = args.cwds.first, !c.isEmpty {
+    // Lets a later `--clear --cwd <path>` invocation match this notification.
+    content.userInfo = ["cwd": c]
 }
 
 let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)

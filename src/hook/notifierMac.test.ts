@@ -67,6 +67,8 @@ describe('notifier (macOS)', () => {
     expect(args).toContain('sess-1');
     expect(args).toContain('--signal-path');
     expect(args).toContain('/tmp/state/signal.json');
+    expect(args).toContain('--cwd');
+    expect(args).toContain('/tmp/repo');
     expect(args).toContain('--click-touch');
     expect(args).toContain('/tmp/state/clicked');
   });

@@ -26,7 +26,9 @@ export function notify(event: NormalisedEvent, config: HookConfig): void {
     '--group',
     event.sessionId || event.cwd,
     '--signal-path',
-    event.signalPath
+    event.signalPath,
+    '--cwd',
+    event.cwd
   ];
 
   const sound = resolveSound(event.event, config);
