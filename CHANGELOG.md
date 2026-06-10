@@ -4,6 +4,19 @@ All notable changes to **Claude Code SuperNotifier** are documented in this file
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-06-10
+
+### Added
+
+- clear notifications on window focus
+- per-PID cwd ownership and ancestor-PID terminal reveal
+- reactive enable/disable and interactive control panel
+- live-preview event-sound picker and per-event notification levels
+- task-duration threshold, per-session stage dedup, cmux awareness
+- per-event sounds, Linux paplay/aplay, bundled fallbacks
+- add Toggle Mute command with file-based gate and status bar indicator
+- add Permission, Question & SubagentStop events with subagent suppression
+
 ## [0.8.0] - 2026-06-06
 
 ### Added
