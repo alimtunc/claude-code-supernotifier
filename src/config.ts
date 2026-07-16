@@ -35,6 +35,7 @@ export function getRuntimeConfig(): SupernotifierConfig {
     allowedRepos: config.get('allowedRepos', []),
     customRepoNames: config.get('customRepoNames', {}),
     focusOnClick: config.get('focusOnClick', DEFAULTS.focusOnClick),
+    clickAction: config.get('clickAction', DEFAULTS.clickAction),
     clearOnFocus: config.get('clearOnFocus', DEFAULTS.clearOnFocus),
     notifierBinaryPath: notifierBinaryPath(),
     notifyCommand: config.get('notifyCommand', DEFAULTS.notifyCommand),

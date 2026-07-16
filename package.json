@@ -293,6 +293,19 @@
           "default": true,
           "markdownDescription": "Open the matching Claude Code session when clicking the notification. macOS only — Linux and Windows notifications are fire-and-forget for now."
         },
+        "claudeCodeSupernotifier.clickAction": {
+          "type": "string",
+          "enum": [
+            "session",
+            "window"
+          ],
+          "enumDescriptions": [
+            "Open the Claude Code session that sent the notification.",
+            "Only bring the VSCode window to the front — no session, chat, or folder lookup."
+          ],
+          "default": "session",
+          "markdownDescription": "What clicking a notification does. `session` opens the matching Claude Code session; `window` only focuses the VSCode window. Requires `#claudeCodeSupernotifier.focusOnClick#`. macOS only."
+        },
         "claudeCodeSupernotifier.clearOnFocus": {
           "type": "boolean",
           "default": true,

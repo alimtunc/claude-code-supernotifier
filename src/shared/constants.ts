@@ -48,6 +48,7 @@ export const DEFAULTS = {
   messageTemplate: '${eventLabel}${branchSuffix}',
   includeBranch: true,
   focusOnClick: true,
+  clickAction: 'session',
   clearOnFocus: true,
   claudeOpenSessionCommand: 'claude-vscode.editor.open',
   claudeFocusCommand: 'claude-vscode.focus',

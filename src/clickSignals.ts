@@ -1,10 +1,12 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { focusClaudeSession } from './focus';
-import { CLICKED_FILE_NAME, SIGNAL_FILE_NAME } from './shared/constants';
+import { CONFIG_SECTION } from './constants';
+import { focusClaudeSession, focusHostWindow } from './focus';
+import { CLICKED_FILE_NAME, DEFAULTS, SIGNAL_FILE_NAME } from './shared/constants';
 import { tryReadJson } from './shared/json';
 import { getClickedPath, getStateDir } from './shared/paths';
+import type { ClickAction } from './types';
 
 interface SignalPayload {
   cwd?: string;
@@ -84,11 +86,20 @@ async function handleClicked(clickedPath: string): Promise<void> {
     return;
   }
 
-  if (signal) {
-    await focusClaudeSession({
-      cwd: signal.workspaceRoot ?? signal.cwd,
-      sessionId: signal.sessionId,
-      pidChain: signal.pidChain
-    });
+  if (!signal) {
+    return;
   }
+
+  const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+  const clickAction = config.get<ClickAction>('clickAction', DEFAULTS.clickAction);
+  if (clickAction === 'window') {
+    focusHostWindow(signal.workspaceRoot ?? signal.cwd);
+    return;
+  }
+
+  await focusClaudeSession({
+    cwd: signal.workspaceRoot ?? signal.cwd,
+    sessionId: signal.sessionId,
+    pidChain: signal.pidChain
+  });
 }

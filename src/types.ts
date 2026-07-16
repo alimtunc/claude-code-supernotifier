@@ -1,5 +1,7 @@
 export type NotificationLevel = 'sound+popup' | 'sound' | 'popup' | 'off';
 
+export type ClickAction = 'session' | 'window';
+
 export type SoundEvent = 'stop' | 'permission' | 'question' | 'subagentStop';
 
 export interface SupernotifierConfig {
@@ -24,6 +26,7 @@ export interface SupernotifierConfig {
   allowedRepos: string[];
   customRepoNames: Record<string, string>;
   focusOnClick: boolean;
+  clickAction: ClickAction;
   clearOnFocus: boolean;
   notifierBinaryPath: string;
   notifyCommand: string;

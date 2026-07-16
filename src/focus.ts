@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { CONFIG_SECTION } from './constants';
 import { DEFAULTS } from './shared/constants';
+import { cwdInsideFolder } from './shared/ownership';
 import { isPidInChain } from './shared/pidChain';
 
 export interface FocusRequest {
@@ -18,18 +19,23 @@ const OPEN_LAST_COMMAND = 'claude-vscode.editor.openLast';
 // focus things *inside* the current window, so neither switches tabs. The bundled
 // `code --reuse-window <path>` CLI asks the running instance to surface the
 // window already holding that workspace, and AppKit switches the native tab as
-// a side effect of `makeKeyAndOrderFront:`. When we don't know the workspace,
-// fall back to plain app activation.
-function bringHostWindowToFront(cwd: string | undefined): void {
+// a side effect of `makeKeyAndOrderFront:`. A window opened from a
+// .code-workspace is identified by that file, not by its member folder paths,
+// so prefer it as the CLI target — passing a bare folder there would open the
+// repo instead of surfacing the workspace window. When we don't know the
+// workspace, fall back to plain app activation.
+export function focusHostWindow(cwd: string | undefined): void {
   if (process.platform !== 'darwin') return;
   if (vscode.window.state.focused) return;
   const idx = process.execPath.indexOf('.app/');
   if (idx === -1) return;
   const appPath = process.execPath.slice(0, idx + '.app'.length);
+  const workspaceFile = vscode.workspace.workspaceFile;
+  const target = workspaceFile?.scheme === 'file' ? workspaceFile.fsPath : cwd;
   try {
-    if (cwd) {
+    if (target) {
       const cliPath = path.join(appPath, 'Contents', 'Resources', 'app', 'bin', 'code');
-      cp.spawn(cliPath, ['--reuse-window', cwd], { detached: true, stdio: 'ignore' }).unref();
+      cp.spawn(cliPath, ['--reuse-window', target], { detached: true, stdio: 'ignore' }).unref();
     } else {
       cp.spawn('/usr/bin/open', ['-a', appPath], { detached: true, stdio: 'ignore' }).unref();
     }
@@ -43,7 +49,7 @@ export async function focusClaudeSession(request: FocusRequest): Promise<void> {
   const openSessionCommand = config.get('claudeOpenSessionCommand', DEFAULTS.claudeOpenSessionCommand);
   const focusCommand = config.get('claudeFocusCommand', DEFAULTS.claudeFocusCommand);
 
-  bringHostWindowToFront(request.cwd);
+  focusHostWindow(request.cwd);
 
   try {
     if (request.sessionId) {
@@ -87,6 +93,12 @@ async function revealClaudeTerminal(pidChain: number[] | undefined): Promise<voi
 
 async function openFolderFallback(cwd: string | undefined): Promise<boolean> {
   if (!cwd) {
+    return false;
+  }
+  // This window already holds cwd — re-opening the folder would tear down the
+  // workspace, so surface the underlying error instead.
+  const folders = vscode.workspace.workspaceFolders ?? [];
+  if (folders.some((folder) => cwdInsideFolder(cwd, folder.uri.fsPath))) {
     return false;
   }
   await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(cwd), {
