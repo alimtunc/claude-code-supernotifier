@@ -42,6 +42,11 @@ yarn.lock
 *.tsbuildinfo
 *.vsix
 
+# Local tool databases that may sit in the repo root
+*.db
+*.db-shm
+*.db-wal
+
 # Source-map and test files
 **/*.map
 **/*.test.ts
