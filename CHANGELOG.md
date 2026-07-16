@@ -4,6 +4,16 @@ All notable changes to **Claude Code SuperNotifier** are documented in this file
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-07-16
+
+### Added
+
+- `clickAction` setting — `session` (default) opens the matching Claude Code session on click; `window` only brings the VSCode window to the front, with no session, chat, or folder lookup. Useful with `.code-workspace` setups and VSCode forks.
+
+### Fixed
+
+- Clicking a notification for a repo opened via a `.code-workspace` no longer opens the bare repo folder: window focus now targets the workspace file with `--reuse-window`, and the `vscode.openFolder` fallback is skipped when the folder is already open in the handling window (a warning surfaces the underlying error instead).
+
 ## [0.9.0] - 2026-06-10
 
 ### Added
